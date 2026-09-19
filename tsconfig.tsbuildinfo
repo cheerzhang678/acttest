@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/types.ts","./src/vite-env.d.ts","./src/components/ui.tsx","./src/data/items.ts","./src/lib/profile.ts","./src/screens/dailycomplete.tsx","./src/screens/day7.tsx","./src/screens/diagnostic.tsx","./src/screens/onboarding.tsx","./src/screens/plan.tsx","./src/screens/practice.tsx"],"version":"5.9.3"}
