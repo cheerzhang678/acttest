@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Lightbulb, Check, ChevronDown, ChevronRight, ArrowRight, ArrowLeft, TrendingUp, HelpCircle, ShieldQuestion, Timer } from 'lucide-react'
-import type { PracticeItem } from '../types'
+import type { DataTable, PracticeItem } from '../types'
 import { PRACTICE_ITEMS } from '../data/items'
-import type { Profile } from '../lib/profile'
+import type { Onboarding, Profile } from '../lib/profile'
 import { PACE_SEC } from '../lib/profile'
 import { AppShell, TwoCol, Card, PrimaryButton, Pill, Meter } from '../components/ui'
 
@@ -31,20 +31,27 @@ interface Rec {
 }
 
 export default function PracticeScreen({
+  onb,
   profile,
   day,
   onDone
 }: {
+  onb: Onboarding
   profile: Profile
   day?: number
   onDone: () => void
 }) {
   // Lead with the skill today's plan targeted, for continuity from the Plan screen.
+  // Science is an optional section — only include its data-passage items if the
+  // student opted into Science at onboarding (otherwise it's off their plan).
   const items = useMemo<PracticeItem[]>(() => {
-    const focus = PRACTICE_ITEMS.filter((p) => p.skill === profile.focusSkill)
-    const rest = PRACTICE_ITEMS.filter((p) => p.skill !== profile.focusSkill)
+    const pool = onb.takingScience
+      ? PRACTICE_ITEMS
+      : PRACTICE_ITEMS.filter((p) => p.domain !== 'Science')
+    const focus = pool.filter((p) => p.skill === profile.focusSkill)
+    const rest = pool.filter((p) => p.skill !== profile.focusSkill)
     return [...focus, ...rest]
-  }, [profile.focusSkill])
+  }, [profile.focusSkill, onb.takingScience])
 
   const [idx, setIdx] = useState(0)
   const [records, setRecords] = useState<Record<number, Rec>>({})
@@ -141,6 +148,7 @@ export default function PracticeScreen({
 
             <Card className="text-[16px] leading-relaxed">
               <Passage text={item.passage} underline={item.underline} />
+              {item.table && <DataTableView table={item.table} />}
             </Card>
             <p className="mt-4 text-[16px] font-semibold text-ink">{item.prompt}</p>
 
@@ -338,6 +346,35 @@ function Option({
       </span>
       <span className="text-[15px] text-ink leading-snug">{text}</span>
     </button>
+  )
+}
+
+// A compact, readable data table — the "figure" a Science item reads from.
+function DataTableView({ table }: { table: DataTable }) {
+  return (
+    <div className="mt-4 overflow-hidden rounded-2xl border border-border">
+      {table.caption && (
+        <div className="bg-surface-2 px-4 py-2 text-[12px] font-semibold text-ink-muted">{table.caption}</div>
+      )}
+      <table className="w-full text-[14px]">
+        <thead>
+          <tr className="bg-surface-2 text-ink-muted">
+            {table.headers.map((h) => (
+              <th key={h} className="px-4 py-2 text-left font-semibold">{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {table.rows.map((row, ri) => (
+            <tr key={ri} className="border-t border-border">
+              {row.map((cell, ci) => (
+                <td key={ci} className="px-4 py-2 tabular-nums text-ink">{cell}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Zap, Check, Gauge } from 'lucide-react'
-import type { DiagItem, Domain } from '../types'
+import type { DiagItem, CoreDomain } from '../types'
 import type { Onboarding, Profile } from '../lib/profile'
 import { DIAG_ITEMS } from '../data/items'
 import { buildProfile, warmStartDifficulty, reportConfidence } from '../lib/profile'
@@ -9,14 +9,14 @@ import { AppShell, TwoCol, Card, Meter, Pill, PrimaryButton, GhostButton } from 
 const FLOOR = 5 // enough signal for a usable plan — first checkpoint
 const CAP = 10 // hard ceiling — never out-stay the student's patience
 
-const ALL_DOMAINS: Domain[] = ['English', 'Math', 'Reading']
+const ALL_DOMAINS: CoreDomain[] = ['English', 'Math', 'Reading']
 
 // Pick the next item: cover the least-tested domain first, then the item whose
 // difficulty is closest to the current adaptive target.
 function pickNext(answeredIds: Set<string>, targetDiff: number): DiagItem | null {
   const remaining = DIAG_ITEMS.filter((i) => !answeredIds.has(i.id))
   if (remaining.length === 0) return null
-  const perDomain: Record<Domain, number> = { English: 0, Math: 0, Reading: 0 }
+  const perDomain: Record<CoreDomain, number> = { English: 0, Math: 0, Reading: 0 }
   for (const i of DIAG_ITEMS) if (answeredIds.has(i.id)) perDomain[i.domain] += 1
   return [...remaining].sort((a, b) => {
     const dom = perDomain[a.domain] - perDomain[b.domain]
@@ -25,8 +25,8 @@ function pickNext(answeredIds: Set<string>, targetDiff: number): DiagItem | null
   })[0]
 }
 
-function domainCounts(answeredIds: Set<string>): Record<Domain, number> {
-  const c: Record<Domain, number> = { English: 0, Math: 0, Reading: 0 }
+function domainCounts(answeredIds: Set<string>): Record<CoreDomain, number> {
+  const c: Record<CoreDomain, number> = { English: 0, Math: 0, Reading: 0 }
   for (const i of DIAG_ITEMS) if (answeredIds.has(i.id)) c[i.domain] += 1
   return c
 }

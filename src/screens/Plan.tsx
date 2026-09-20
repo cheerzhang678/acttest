@@ -1,11 +1,11 @@
 import { TrendingUp, Target, CheckCircle2, Clock, ArrowRight, CalendarClock, RefreshCw, FlaskConical, PenLine } from 'lucide-react'
 import type { ReactNode } from 'react'
-import type { Domain, Skill } from '../types'
+import type { CoreDomain, Skill } from '../types'
 import { SKILL_LABEL, SKILL_DOMAIN } from '../types'
 import type { Onboarding, Profile } from '../lib/profile'
 import { AppShell, TwoCol, Card, Meter, Pill, PrimaryButton } from '../components/ui'
 
-const DOMAINS: Domain[] = ['English', 'Math', 'Reading']
+const DOMAINS: CoreDomain[] = ['English', 'Math', 'Reading']
 
 // Screen 3 — the personalized plan. It answers the implicit question: "where's
 // my time going, and why these things?" Everything traces to the diagnostic:

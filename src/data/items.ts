@@ -299,6 +299,48 @@ export const PRACTICE_ITEMS: PracticeItem[] = [
     takeaway: "Add/Delete isn't about whether a fact is true — it's whether it serves the paragraph's job. Pick the right conclusion AND the right reason.",
     aiCaveat: 'Judgment call again — here\'s how I read the paragraph\'s focus. Push back if you see it another way.',
     confirm: 'Exactly — off-topic detail, and C nails the reason (focus), not just "never mentioned again."'
+  },
+  // Science data-passage item. Only shown when the student opts into Science at
+  // onboarding (it's an optional section, scored separately from the Composite).
+  // Data interpretation is objective — one defensible answer — so the AI coaches
+  // with confidence, like a grammar item (kind: 'science' behaves like grammar;
+  // no rhetoric restraint). The figure is a real table the question reads from.
+  {
+    id: 'p-sci-1',
+    kind: 'science',
+    domain: 'Science',
+    skill: 'data-representation',
+    difficulty: 2,
+    passage:
+      'Students measured how much of a salt dissolves in 100 g of water at several temperatures. Their results are shown in Table 1.',
+    underline: '',
+    table: {
+      caption: 'Table 1 — Solubility of the salt vs. water temperature',
+      headers: ['Temperature (°C)', 'Solubility (g per 100 g water)'],
+      rows: [
+        ['10', '20'],
+        ['20', '32'],
+        ['30', '46'],
+        ['40', '64'],
+        ['50', '86']
+      ]
+    },
+    prompt:
+      'Based on Table 1, the solubility of the salt at 25 °C would most likely be closest to:',
+    choices: [
+      { label: 'A', text: '20 g' },
+      { label: 'B', text: '32 g' },
+      { label: 'C', text: '39 g' },
+      { label: 'D', text: '64 g' }
+    ],
+    correct: 2,
+    distractorTrap: 1,
+    hint: '25 °C falls between two rows in the table. What are the solubility values just below and just above it?',
+    ruleTitle: 'Interpolate between data points',
+    explanation:
+      'The table jumps from 32 g at 20 °C to 46 g at 30 °C. 25 °C sits halfway between those rows, so the value is about halfway between them — roughly 39 g. B (32) just copies the 20 °C row, but solubility keeps climbing as temperature rises.',
+    takeaway: "When a value lands between two rows, estimate between them — don't just grab the nearest row.",
+    confirm: 'Right — 25 °C is between 20° and 30°, so solubility is about 39 g.'
   }
 ]
 

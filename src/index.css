@@ -10,8 +10,10 @@ body,
 
 body {
   margin: 0;
-  background: #faf8f3; /* warm cream canvas — matches Kira brand */
-  color: #1a1a1a;
+  /* cool lavender-white canvas with a soft vertical wash — matches the Kira app */
+  background: linear-gradient(180deg, #fdfcff 0%, #f5f3fc 100%);
+  background-attachment: fixed;
+  color: #1b1836;
   font-family: 'Inter', ui-sans-serif, system-ui, 'PingFang SC', 'Microsoft YaHei', sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;

@@ -1,4 +1,4 @@
-import type { Domain, Skill } from '../types'
+import type { CoreDomain, Domain, Skill } from '../types'
 import { DIAG_ITEMS } from '../data/items'
 import { SKILL_DOMAIN } from '../types'
 
@@ -14,12 +14,14 @@ export interface Onboarding {
 }
 
 // ACT pace budget — seconds per question, straight from the Enhanced ACT format
-// (English 50Q/35min ≈ 42s, Math 45Q/50min ≈ 67s, Reading 36Q/40min ≈ 67s).
-// Accuracy without pace loses points on test day, so practice trains the clock.
+// (English 50Q/35min ≈ 42s, Math 45Q/50min ≈ 67s, Reading 36Q/40min ≈ 67s,
+// Science 40Q/40min ≈ 60s). Accuracy without pace loses points on test day, so
+// practice trains the clock.
 export const PACE_SEC: Record<Domain, number> = {
   English: 42,
   Math: 67,
-  Reading: 67
+  Reading: 67,
+  Science: 60
 }
 
 export interface DomainStat {
@@ -30,7 +32,7 @@ export interface DomainStat {
 
 export interface Profile {
   answered: number
-  byDomain: Record<Domain, DomainStat>
+  byDomain: Record<CoreDomain, DomainStat>
   weakSkills: Skill[] // ranked, weakest first
   strongSkills: Skill[] // answered correctly — used for mastery-aware feedback
   focusSkill: Skill // the single skill today's session centers on
@@ -38,7 +40,7 @@ export interface Profile {
   confidence: number // 0–100, how dialed-in the report is
 }
 
-const DOMAINS: Domain[] = ['English', 'Math', 'Reading']
+const DOMAINS: CoreDomain[] = ['English', 'Math', 'Reading']
 
 // Keep the plan focused on English when the diagnostic is inconclusive.
 const FALLBACK_WEAK: Skill[] = ['rhetoric-add-delete', 'punctuation', 'subject-verb']
@@ -61,7 +63,7 @@ export function reportConfidence(n: number): number {
 
 // Turn diagnostic answers into a defensible profile.
 export function buildProfile(onb: Onboarding, answers: Record<string, boolean>): Profile {
-  const byDomain: Record<Domain, DomainStat> = {
+  const byDomain: Record<CoreDomain, DomainStat> = {
     English: { correct: 0, total: 0, estScore: 0 },
     Math: { correct: 0, total: 0, estScore: 0 },
     Reading: { correct: 0, total: 0, estScore: 0 }

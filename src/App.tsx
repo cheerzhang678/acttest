@@ -45,6 +45,7 @@ export default function App() {
 
       {step === 'practice' && profile && (
         <PracticeScreen
+          onb={onb}
           profile={profile}
           day={day}
           onDone={() => setStep(day >= 7 ? 'day7' : 'daily')}

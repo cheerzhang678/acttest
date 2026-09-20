@@ -1,24 +1,58 @@
 import type { ReactNode } from 'react'
-import { Sparkles } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { BarChart3, BookOpen, GraduationCap, Home, PenTool, Sparkles } from 'lucide-react'
 
-// Desktop / Chromebook-first web shell. Kira ships as district Chromebook web,
-// so the prototype is a real responsive web app — not a phone frame. It reads
-// for wide screens (two-column screens below) and gracefully stacks on narrow.
+// Kira app shell: a fixed dark violet icon rail on the left + a light lavender
+// content area on the right. This mirrors the real product (teacher/student app)
+// so the prototype reads as living *inside* Kira, not as a separate tool.
 export function AppShell({ children, headerRight }: { children: ReactNode; headerRight?: ReactNode }) {
   return (
-    <div className="min-h-screen w-full bg-bg text-ink flex flex-col">
-      <header className="sticky top-0 z-10 border-b border-border bg-bg/80 backdrop-blur">
-        <div className="mx-auto w-full max-w-5xl px-6 h-14 flex items-center justify-between">
-          <span className="inline-flex items-center gap-2 font-display font-bold text-[15px] text-accent">
-            <Sparkles size={18} /> Kira ACT
+    <div className="min-h-screen w-full flex text-ink">
+      <NavRail />
+      <div className="flex-1 min-w-0 flex flex-col">
+        <header className="sticky top-0 z-10 h-14 flex items-center justify-between px-6 lg:px-10 border-b border-border/70 bg-bg/70 backdrop-blur">
+          <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-ink-muted">
+            <span className="sm:hidden font-display font-bold text-ink">Kira ACT</span>
+            <span className="hidden sm:inline">ACT Prep</span>
           </span>
-          {headerRight && <div className="flex items-center gap-2">{headerRight}</div>}
-        </div>
-      </header>
-      <main className="flex-1 w-full">
-        <div className="mx-auto w-full max-w-5xl px-6 py-8">{children}</div>
-      </main>
+          {headerRight ? <div className="flex items-center gap-2">{headerRight}</div> : <span />}
+        </header>
+        <main className="flex-1">
+          <div className="mx-auto w-full max-w-5xl px-6 lg:px-10 py-8">{children}</div>
+        </main>
+      </div>
     </div>
+  )
+}
+
+// The signature Kira rail — icon-only, dark violet. Nav is decorative in the
+// prototype; "study" is the active surface.
+function NavRail() {
+  return (
+    <aside className="hidden sm:flex w-16 shrink-0 flex-col items-center gap-1.5 bg-rail py-4 shadow-rail">
+      <div className="mb-4 grid h-10 w-10 place-items-center rounded-2xl bg-accent text-white">
+        <GraduationCap size={20} />
+      </div>
+      <RailIcon icon={Home} />
+      <RailIcon icon={BookOpen} active />
+      <RailIcon icon={Sparkles} />
+      <RailIcon icon={BarChart3} />
+      <RailIcon icon={PenTool} />
+    </aside>
+  )
+}
+
+function RailIcon({ icon: Icon, active = false }: { icon: LucideIcon; active?: boolean }) {
+  return (
+    <button
+      aria-hidden
+      tabIndex={-1}
+      className={`grid h-10 w-10 place-items-center rounded-2xl transition ${
+        active ? 'bg-white/15 text-white' : 'text-rail-icon hover:bg-white/10 hover:text-white'
+      }`}
+    >
+      <Icon size={19} />
+    </button>
   )
 }
 
@@ -49,6 +83,34 @@ export function Card({ children, className = '' }: { children: ReactNode; classN
   )
 }
 
+// Tinted rounded-square icon chip — Kira's tool-card / activity-row icon style.
+export type ChipTone = 'violet' | 'pink' | 'blue' | 'mint' | 'warn'
+export function IconChip({
+  icon: Icon,
+  tone = 'violet',
+  size = 40
+}: {
+  icon: LucideIcon
+  tone?: ChipTone
+  size?: number
+}) {
+  const map: Record<ChipTone, string> = {
+    violet: 'bg-accent-soft text-accent',
+    pink: 'bg-chip-pink text-chip-pink-ink',
+    blue: 'bg-chip-blue text-chip-blue-ink',
+    mint: 'bg-chip-mint text-chip-mint-ink',
+    warn: 'bg-warn-soft text-warn'
+  }
+  return (
+    <span
+      className={`grid place-items-center rounded-2xl shrink-0 ${map[tone]}`}
+      style={{ width: size, height: size }}
+    >
+      <Icon size={Math.round(size * 0.5)} />
+    </span>
+  )
+}
+
 export function PrimaryButton({
   children,
   onClick,
@@ -62,7 +124,7 @@ export function PrimaryButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="w-full rounded-2xl bg-accent text-white font-semibold py-3.5 text-[15px] transition active:scale-[0.98] hover:bg-accent/90 disabled:opacity-40 disabled:active:scale-100"
+      className="w-full rounded-full bg-accent text-white font-semibold py-3.5 text-[15px] transition active:scale-[0.98] hover:bg-accent/90 disabled:opacity-40 disabled:active:scale-100"
     >
       {children}
     </button>
@@ -73,7 +135,7 @@ export function GhostButton({ children, onClick }: { children: ReactNode; onClic
   return (
     <button
       onClick={onClick}
-      className="w-full rounded-2xl bg-transparent text-ink-muted font-medium py-2.5 text-[14px] transition active:scale-[0.98] hover:text-ink"
+      className="w-full rounded-full bg-transparent text-ink-muted font-medium py-2.5 text-[14px] transition active:scale-[0.98] hover:text-ink"
     >
       {children}
     </button>
