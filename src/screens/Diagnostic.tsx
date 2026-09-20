@@ -80,7 +80,7 @@ export default function DiagnosticScreen({
       const nextDiff = Math.max(1, Math.min(3, targetDiff + (correct ? 1 : -1)))
       const n = Object.keys(nextAnswers).length
       if (n >= CAP) return finish(nextAnswers)
-      if (n >= FLOOR) {
+      if (n >= FLOOR && !continued) {
         setAnswers(nextAnswers)
         setTargetDiff(nextDiff)
         setPicked(null)
@@ -142,7 +142,7 @@ export default function DiagnosticScreen({
               Build my plan now
             </button>
             <button
-              onClick={() => { setPaused(false); advance(answers, targetDiff) }}
+              onClick={() => { setContinued(true); setPaused(false); advance(answers, targetDiff) }}
               className="sm:flex-1 w-full rounded-full bg-transparent border border-accent text-accent font-semibold py-3.5 text-[15px] text-center transition active:scale-[0.98] hover:bg-accent-soft"
             >
               Answer {more} more for a sharper read →
@@ -198,11 +198,30 @@ export default function DiagnosticScreen({
         }
         right={
           <Card>
-            <div className="text-[13px] font-semibold text-ink-muted mb-2">Progress to your plan</div>
-            <Meter value={(Math.min(answeredCount, FLOOR) / FLOOR) * 100} />
-            <div className="mt-2 text-[12px] text-ink-muted">
-              {untilPlan > 0 ? `${untilPlan} more to unlock` : 'Ready — keep going for a sharper read'}
-            </div>
+            {continued ? (
+              <>
+                {/* sharper-read phase: progress toward the full set, stop anytime */}
+                <div className="text-[13px] font-semibold text-ink-muted mb-2">Sharpening your report</div>
+                <Meter value={(Math.min(answeredCount, CAP) / CAP) * 100} tone="success" />
+                <div className="mt-2 text-[12px] text-ink-muted">
+                  Question {answeredCount + 1} of {CAP} · already enough for a plan
+                </div>
+                <button
+                  onClick={() => finish(answers)}
+                  className="mt-3 w-full rounded-full bg-accent text-white font-semibold py-2.5 text-[14px] text-center transition active:scale-[0.98] hover:bg-accent/90"
+                >
+                  Build my plan now
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="text-[13px] font-semibold text-ink-muted mb-2">Progress to your plan</div>
+                <Meter value={(Math.min(answeredCount, FLOOR) / FLOOR) * 100} />
+                <div className="mt-2 text-[12px] text-ink-muted">
+                  {untilPlan > 0 ? `${untilPlan} more to unlock` : 'Ready — keep going for a sharper read'}
+                </div>
+              </>
+            )}
 
             <div className="mt-5 text-[13px] font-semibold text-ink-muted mb-2">Domains covered</div>
             <div className="flex flex-wrap gap-1.5">
