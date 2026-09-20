@@ -34,12 +34,14 @@ export default function PracticeScreen({
   onb,
   profile,
   day,
-  onDone
+  onDone,
+  onViewReport
 }: {
   onb: Onboarding
   profile: Profile
   day?: number
   onDone: () => void
+  onViewReport?: () => void
 }) {
   // Lead with the skill today's plan targeted, for continuity from the Plan screen.
   // Science is an optional section — only include its data-passage items if the
@@ -141,6 +143,17 @@ export default function PracticeScreen({
       <TwoCol
         left={
           <div key={item.id} className="animate-fade-up">
+            {/* escape hatch back to the diagnostic report / plan — the practice
+                set is built from it, so let the student re-check it anytime,
+                especially before the very first question */}
+            {onViewReport && (
+              <button
+                onClick={onViewReport}
+                className="mb-3 inline-flex items-center gap-1 text-[13px] font-semibold text-ink-muted hover:text-accent active:scale-95 transition"
+              >
+                <ArrowLeft size={15} /> Your plan &amp; report
+              </button>
+            )}
             <div className="flex items-center gap-2 mb-3">
               <span className="text-[13px] font-semibold text-ink-muted">Question {idx + 1} of {items.length}</span>
               <Pill tone="accent">{item.domain}</Pill>

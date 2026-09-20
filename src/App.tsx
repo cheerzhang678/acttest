@@ -49,6 +49,7 @@ export default function App() {
           profile={profile}
           day={day}
           onDone={() => setStep(day >= 7 ? 'day7' : 'daily')}
+          onViewReport={() => setStep('plan')}
         />
       )}
 
