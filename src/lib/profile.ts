@@ -7,6 +7,19 @@ export interface Onboarding {
   current: number
   weeks: number
   dailyMin: number
+  // Optional ACT sections — don't count toward Composite (English + Math +
+  // Reading). Student opts in only if their target colleges require them.
+  takingScience: boolean
+  takingWriting: boolean
+}
+
+// ACT pace budget — seconds per question, straight from the Enhanced ACT format
+// (English 50Q/35min ≈ 42s, Math 45Q/50min ≈ 67s, Reading 36Q/40min ≈ 67s).
+// Accuracy without pace loses points on test day, so practice trains the clock.
+export const PACE_SEC: Record<Domain, number> = {
+  English: 42,
+  Math: 67,
+  Reading: 67
 }
 
 export interface DomainStat {

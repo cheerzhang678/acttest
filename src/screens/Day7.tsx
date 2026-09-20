@@ -36,7 +36,7 @@ export default function Day7Screen({
         <span className="inline-flex items-center gap-1.5 text-[15px] font-bold text-ink">
           <Sparkles size={17} className="text-accent" /> One week in
         </span>
-        <h1 className="mt-4 text-[30px] font-bold text-ink leading-tight max-w-2xl">
+        <h1 className="mt-4 text-[30px] font-display font-bold text-ink leading-tight max-w-2xl">
           7 days. You've moved your ACT up 2 points.
         </h1>
       </div>

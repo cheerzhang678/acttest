@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { CalendarDays, Clock, ArrowRight, Target } from 'lucide-react'
+import { CalendarDays, Clock, ArrowRight, Target, FlaskConical, PenLine } from 'lucide-react'
 import type { Onboarding } from '../lib/profile'
 import { AppShell, Card, PrimaryButton } from '../components/ui'
 
@@ -17,6 +17,8 @@ export default function OnboardingScreen({
   const [target, setTarget] = useState(initial.target)
   const [weeks, setWeeks] = useState(initial.weeks)
   const [dailyMin, setDailyMin] = useState(initial.dailyMin)
+  const [takingScience, setTakingScience] = useState(initial.takingScience)
+  const [takingWriting, setTakingWriting] = useState(initial.takingWriting)
   const gap = Math.max(0, target - initial.current)
 
   return (
@@ -24,7 +26,7 @@ export default function OnboardingScreen({
       <div className="grid gap-8 lg:grid-cols-2 items-center lg:min-h-[70vh] animate-fade-up">
         {/* left — hero + the gap */}
         <div>
-          <h1 className="text-[32px] lg:text-[40px] leading-tight font-bold text-ink">
+          <h1 className="text-[32px] lg:text-[40px] leading-tight font-display font-bold text-ink">
             Let's find your gaps,
             <br />
             then the fastest way to close them.
@@ -80,8 +82,34 @@ export default function OnboardingScreen({
               onInc={() => setDailyMin((v) => Math.min(180, v + 5))}
             />
           </div>
+
+          {/* optional sections — Composite is English + Math + Reading only, so
+              these are opt-in based on what the student's target colleges need */}
+          <div className="mt-5">
+            <div className="text-[13px] font-semibold text-ink">Optional sections</div>
+            <p className="text-[12px] text-ink-muted mt-0.5">
+              Only if your target colleges require them — they don't change your Composite.
+            </p>
+            <div className="mt-3 space-y-2">
+              <Toggle
+                icon={<FlaskConical size={17} />}
+                label="Science"
+                hint="Graphs & data · separate score"
+                on={takingScience}
+                onToggle={() => setTakingScience((v) => !v)}
+              />
+              <Toggle
+                icon={<PenLine size={17} />}
+                label="Writing"
+                hint="1 timed essay"
+                on={takingWriting}
+                onToggle={() => setTakingWriting((v) => !v)}
+              />
+            </div>
+          </div>
+
           <div className="mt-6 space-y-3">
-            <PrimaryButton onClick={() => onStart({ ...initial, target, weeks, dailyMin })}>
+            <PrimaryButton onClick={() => onStart({ ...initial, target, weeks, dailyMin, takingScience, takingWriting })}>
               Start diagnostic · ~5 min
             </PrimaryButton>
             <p className="text-center text-[12px] text-ink-muted">Bail anytime — you'll still get a plan.</p>
@@ -127,6 +155,46 @@ function RoundBtn({ children, onClick }: { children: ReactNode; onClick: () => v
       className="h-8 w-8 rounded-full bg-surface text-ink text-[18px] leading-none font-semibold flex items-center justify-center active:scale-90 hover:bg-white transition border border-border"
     >
       {children}
+    </button>
+  )
+}
+
+function Toggle({
+  icon,
+  label,
+  hint,
+  on,
+  onToggle
+}: {
+  icon: ReactNode
+  label: string
+  hint: string
+  on: boolean
+  onToggle: () => void
+}) {
+  return (
+    <button
+      onClick={onToggle}
+      className={`w-full flex items-center justify-between rounded-2xl border px-4 py-3 transition text-left ${
+        on ? 'border-accent bg-accent-soft' : 'border-border bg-surface-2 hover:border-accent/40'
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <span className={on ? 'text-accent' : 'text-ink-muted'}>{icon}</span>
+        <div>
+          <div className="text-[15px] font-medium text-ink">{label}</div>
+          <div className="text-[12px] text-ink-muted">{hint}</div>
+        </div>
+      </div>
+      <span
+        className={`relative h-6 w-10 shrink-0 rounded-full transition ${on ? 'bg-accent' : 'bg-border'}`}
+      >
+        <span
+          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${
+            on ? 'left-[18px]' : 'left-0.5'
+          }`}
+        />
+      </span>
     </button>
   )
 }

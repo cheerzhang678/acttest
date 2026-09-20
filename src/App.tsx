@@ -9,7 +9,7 @@ import Day7Screen from './screens/Day7'
 
 export type Step = 'onboarding' | 'diagnostic' | 'plan' | 'practice' | 'daily' | 'day7'
 
-const DEFAULT_ONB: Onboarding = { target: 28, current: 22, weeks: 10, dailyMin: 40 }
+const DEFAULT_ONB: Onboarding = { target: 28, current: 22, weeks: 10, dailyMin: 40, takingScience: false, takingWriting: false }
 
 export default function App() {
   const [step, setStep] = useState<Step>('onboarding')

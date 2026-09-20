@@ -34,7 +34,7 @@ export default function DailyCompleteScreen({
       }
     >
       <div className="animate-fade-up">
-        <h1 className="text-[26px] font-bold text-ink leading-tight">Day {day} done</h1>
+        <h1 className="text-[26px] font-display font-bold text-ink leading-tight">Day {day} done</h1>
         <p className="text-[14px] text-ink-muted mt-1">Loop closed for today — here's what's waiting tomorrow.</p>
       </div>
 

@@ -1,4 +1,5 @@
-import { TrendingUp, Target, CheckCircle2, Clock, ArrowRight, CalendarClock, RefreshCw } from 'lucide-react'
+import { TrendingUp, Target, CheckCircle2, Clock, ArrowRight, CalendarClock, RefreshCw, FlaskConical, PenLine } from 'lucide-react'
+import type { ReactNode } from 'react'
 import type { Domain, Skill } from '../types'
 import { SKILL_LABEL, SKILL_DOMAIN } from '../types'
 import type { Onboarding, Profile } from '../lib/profile'
@@ -32,7 +33,7 @@ export default function PlanScreen({
       }
     >
       <div className="animate-fade-up">
-        <h1 className="text-[26px] font-bold text-ink leading-tight">Your plan's ready</h1>
+        <h1 className="text-[26px] font-display font-bold text-ink leading-tight">Your plan's ready</h1>
         <p className="text-[14px] text-ink-muted mt-1">
           Built from the {profile.answered} questions you just answered.
         </p>
@@ -110,6 +111,32 @@ export default function PlanScreen({
               <PrimaryButton onClick={onStartPractice}>
                 Start today · {SKILL_LABEL[profile.focusSkill]}
               </PrimaryButton>
+
+              {/* optional sections the student opted into at onboarding */}
+              {(onb.takingScience || onb.takingWriting) && (
+                <Card>
+                  <div className="text-[13px] font-semibold text-ink-muted mb-2">Also on your plan</div>
+                  <div className="space-y-2">
+                    {onb.takingScience && (
+                      <OptionalRow
+                        icon={<FlaskConical size={16} />}
+                        label="Science"
+                        detail="1 timed data-passage set / week · scored separately"
+                      />
+                    )}
+                    {onb.takingWriting && (
+                      <OptionalRow
+                        icon={<PenLine size={16} />}
+                        label="Writing"
+                        detail="1 essay / week with rubric feedback"
+                      />
+                    )}
+                  </div>
+                  <p className="mt-2 text-[12px] text-ink-muted leading-relaxed">
+                    These don't affect your Composite — kept light so your core time stays on English, Math &amp; Reading.
+                  </p>
+                </Card>
+              )}
             </div>
           }
         />
@@ -129,6 +156,18 @@ function WeakRow({ skill, estGain }: { skill: Skill; estGain: number }) {
         </div>
       </div>
       <Pill tone="success">~+{estGain} pts</Pill>
+    </div>
+  )
+}
+
+function OptionalRow({ icon, label, detail }: { icon: ReactNode; label: string; detail: string }) {
+  return (
+    <div className="flex items-start gap-2.5">
+      <span className="text-accent mt-0.5">{icon}</span>
+      <div>
+        <div className="text-[14px] font-semibold text-ink">{label}</div>
+        <div className="text-[12px] text-ink-muted leading-snug">{detail}</div>
+      </div>
     </div>
   )
 }

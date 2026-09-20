@@ -10,8 +10,9 @@ body,
 
 body {
   margin: 0;
-  background: #eceef6;
-  color: var(--ink, #141a2e);
+  background: #faf8f3; /* warm cream canvas — matches Kira brand */
+  color: #1a1a1a;
+  font-family: 'Inter', ui-sans-serif, system-ui, 'PingFang SC', 'Microsoft YaHei', sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }

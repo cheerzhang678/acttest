@@ -98,7 +98,7 @@ export default function DiagnosticScreen({
           <div className="flex items-center gap-2 text-success font-bold text-[15px]">
             <Check size={18} /> Enough for a solid plan
           </div>
-          <h1 className="mt-3 text-[26px] font-bold text-ink leading-tight">
+          <h1 className="mt-3 text-[26px] font-display font-bold text-ink leading-tight">
             You've answered {answeredCount}. I can build your plan now.
           </h1>
 

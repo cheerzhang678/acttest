@@ -9,7 +9,7 @@ export function AppShell({ children, headerRight }: { children: ReactNode; heade
     <div className="min-h-screen w-full bg-bg text-ink flex flex-col">
       <header className="sticky top-0 z-10 border-b border-border bg-bg/80 backdrop-blur">
         <div className="mx-auto w-full max-w-5xl px-6 h-14 flex items-center justify-between">
-          <span className="inline-flex items-center gap-2 font-bold text-[15px] text-accent">
+          <span className="inline-flex items-center gap-2 font-display font-bold text-[15px] text-accent">
             <Sparkles size={18} /> Kira ACT
           </span>
           {headerRight && <div className="flex items-center gap-2">{headerRight}</div>}

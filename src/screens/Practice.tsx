@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react'
-import { Lightbulb, Check, ChevronDown, ChevronRight, ArrowRight, ArrowLeft, TrendingUp, HelpCircle, ShieldQuestion } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Lightbulb, Check, ChevronDown, ChevronRight, ArrowRight, ArrowLeft, TrendingUp, HelpCircle, ShieldQuestion, Timer } from 'lucide-react'
 import type { PracticeItem } from '../types'
 import { PRACTICE_ITEMS } from '../data/items'
 import type { Profile } from '../lib/profile'
+import { PACE_SEC } from '../lib/profile'
 import { AppShell, TwoCol, Card, PrimaryButton, Pill, Meter } from '../components/ui'
 
 // Screen 4 — daily practice with layered AI feedback (key moment #2).
@@ -26,6 +27,7 @@ interface Rec {
   firstWrong: number | null
   lastPick: number | null
   correctOnFirst: boolean
+  timeSec: number // seconds to first commit — the pace signal
 }
 
 export default function PracticeScreen({
@@ -55,6 +57,27 @@ export default function PracticeScreen({
   const mastered = profile.strongSkills.includes(item.skill)
   const resolvedCorrect = phase === 'resolved' && rec?.lastPick === item.correct
 
+  // ---- Pace clock: ACT is time-pressured, so practice trains the clock too ----
+  const paceTarget = PACE_SEC[item.domain]
+  const [startTs, setStartTs] = useState(() => Date.now())
+  const [nowTs, setNowTs] = useState(() => Date.now())
+
+  // Reset the clock when a fresh (unanswered) question comes up.
+  useEffect(() => {
+    if (!records[idx]) setStartTs(Date.now())
+    setNowTs(Date.now())
+  }, [idx]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Tick only while the student is still deciding — freeze once committed.
+  useEffect(() => {
+    if (phase !== 'answering') return
+    const t = window.setInterval(() => setNowTs(Date.now()), 500)
+    return () => window.clearInterval(t)
+  }, [phase, idx])
+
+  const liveSec = phase === 'answering' ? Math.floor((nowTs - startTs) / 1000) : rec?.timeSec ?? 0
+  const onPace = liveSec <= paceTarget
+
   function setRec(next: Rec) {
     setRecords((r) => ({ ...r, [idx]: next }))
   }
@@ -63,16 +86,18 @@ export default function PracticeScreen({
     if (phase === 'resolved') return
     const correct = i === item.correct
     if (phase === 'answering') {
+      // Capture time-to-first-commit — the pace signal we coach on.
+      const timeSec = Math.floor((Date.now() - startTs) / 1000)
       if (correct) {
         setStreak((s) => s + 1)
-        setRec({ phase: 'resolved', firstWrong: null, lastPick: i, correctOnFirst: true })
+        setRec({ phase: 'resolved', firstWrong: null, lastPick: i, correctOnFirst: true, timeSec })
       } else {
         setStreak(0)
-        setRec({ phase: 'hint', firstWrong: i, lastPick: i, correctOnFirst: false })
+        setRec({ phase: 'hint', firstWrong: i, lastPick: i, correctOnFirst: false, timeSec })
       }
     } else if (phase === 'hint') {
       if (i === rec?.firstWrong) return
-      setRec({ phase: 'resolved', firstWrong: rec?.firstWrong ?? null, lastPick: i, correctOnFirst: false })
+      setRec({ phase: 'resolved', firstWrong: rec?.firstWrong ?? null, lastPick: i, correctOnFirst: false, timeSec: rec?.timeSec ?? 0 })
     }
   }
 
@@ -141,6 +166,32 @@ export default function PracticeScreen({
                   </Pill>
                 </div>
               )}
+            </Card>
+
+            {/* pace clock — trains the timing that decides test day */}
+            <Card>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-[13px] font-semibold text-ink-muted">
+                  <Timer size={15} /> Pace
+                </div>
+                <span className={`text-[14px] font-bold tabular-nums ${
+                  phase === 'answering'
+                    ? onPace ? 'text-ink' : 'text-warn'
+                    : onPace ? 'text-success' : 'text-warn'
+                }`}>
+                  {fmt(liveSec)} <span className="text-ink-muted font-medium">/ {fmt(paceTarget)}</span>
+                </span>
+              </div>
+              <div className="mt-2">
+                <Meter value={(liveSec / paceTarget) * 100} tone={onPace ? 'accent' : 'warn'} />
+              </div>
+              <p className="mt-2 text-[12px] text-ink-muted leading-relaxed">
+                {phase === 'answering'
+                  ? `${item.domain} runs ~${fmt(paceTarget)} per question on test day.`
+                  : onPace
+                    ? `On pace — ${fmt(liveSec)} vs the ~${fmt(paceTarget)} you get on test day.`
+                    : `Took ${fmt(liveSec)} — over the ~${fmt(paceTarget)} test-day budget. Right answer, but this pace runs you out of time.`}
+              </p>
             </Card>
 
             {/* AI coaching rail — restrained by default, opens up only when useful */}
@@ -247,6 +298,13 @@ export default function PracticeScreen({
       />
     </AppShell>
   )
+}
+
+// mm:ss for the pace clock.
+function fmt(sec: number): string {
+  const m = Math.floor(sec / 60)
+  const s = sec % 60
+  return `${m}:${String(s).padStart(2, '0')}`
 }
 
 function Option({
