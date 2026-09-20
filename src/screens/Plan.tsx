@@ -57,7 +57,7 @@ export default function PlanScreen({
                 {/* living-profile note (P1#6 + Student-Atlas framing) */}
                 <div className="mt-4 flex items-start gap-2 text-[12px] text-white/60 leading-relaxed">
                   <RefreshCw size={13} className="mt-0.5 shrink-0 text-accent-soft" />
-                  <span>This estimate updates itself as you practice — it won't jump around, it sharpens.</span>
+                  <span>Updates as you practice — it sharpens, it won't jump around.</span>
                 </div>
               </div>
 
@@ -133,7 +133,7 @@ export default function PlanScreen({
                     )}
                   </div>
                   <p className="mt-2 text-[12px] text-ink-muted leading-relaxed">
-                    These don't affect your Composite — kept light so your core time stays on English, Math &amp; Reading.
+                    Won't affect your Composite. Core time stays on English, Math &amp; Reading.
                   </p>
                 </Card>
               )}

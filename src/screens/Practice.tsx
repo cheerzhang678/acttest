@@ -208,10 +208,10 @@ export default function PracticeScreen({
               </div>
               <p className="mt-2 text-[12px] text-ink-muted leading-relaxed">
                 {phase === 'answering'
-                  ? `${item.domain} runs ~${fmt(paceTarget)} per question on test day.`
+                  ? `${item.domain}: ~${fmt(paceTarget)} per question on test day.`
                   : onPace
-                    ? `On pace — ${fmt(liveSec)} vs the ~${fmt(paceTarget)} you get on test day.`
-                    : `Took ${fmt(liveSec)} — over the ~${fmt(paceTarget)} test-day budget. Right answer, but this pace runs you out of time.`}
+                    ? `On pace — ${fmt(liveSec)} vs ~${fmt(paceTarget)} on test day.`
+                    : `Took ${fmt(liveSec)}, over the ~${fmt(paceTarget)} budget. Right answer — too slow for test day.`}
               </p>
             </Card>
 
@@ -228,7 +228,7 @@ export default function PracticeScreen({
 
             {phase === 'answering' && !(item.kind === 'rhetoric' && item.goalQuestion) && (
               <p className="text-[13px] text-ink-muted leading-relaxed px-1">
-                Pick the answer you think is best — I'll only jump in if it helps.
+                Pick what you think is best. I'll jump in only if it helps.
               </p>
             )}
 

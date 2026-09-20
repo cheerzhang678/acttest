@@ -106,7 +106,7 @@ export default function DiagnosticScreen({
             <Check size={18} /> Enough for a solid plan
           </div>
           <h1 className="mt-3 text-[26px] font-display font-semibold text-ink leading-tight">
-            You've answered {answeredCount}. I can build your plan now.
+            {answeredCount} answered. Enough to build your plan.
           </h1>
 
           <div className="mt-5 flex flex-wrap gap-2">
@@ -131,7 +131,7 @@ export default function DiagnosticScreen({
               <ConfRow label={`Answer ${more} more (${CAP} total)`} value={confMax} tone="success" />
             </div>
             <p className="mt-3 text-[13px] text-ink-muted leading-relaxed">
-              Either way your plan updates itself as you practice — day-1 doesn't have to be perfect.
+              Either way, your plan sharpens as you practice. Day 1 needn't be perfect.
             </p>
           </Card>
 

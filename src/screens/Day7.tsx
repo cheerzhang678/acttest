@@ -50,8 +50,8 @@ export default function Day7Screen({
               <div className="flex items-start gap-2 rounded-2xl bg-accent-soft p-4">
                 <Star size={16} className="mt-0.5 shrink-0 text-accent" />
                 <p className="text-[13px] text-ink leading-relaxed">
-                  Most prep apps lose 4 out of 5 students before day 7. You showed up all week —
-                  that consistency is what actually moves scores.
+                  Most apps lose 4 of 5 students by day 7. You showed up all week —
+                  that's what moves scores.
                 </p>
               </div>
 
@@ -83,8 +83,8 @@ export default function Day7Screen({
                   <Trophy size={17} /> So close
                 </div>
                 <p className="mt-2 text-[14px] text-ink leading-relaxed">
-                  Two more days and <span className="font-bold">{SKILL_LABEL[secondarySkill]}</span> jumps 60% → 80%. Clear that
-                  tier and English locks in another point.
+                  Two more days: <span className="font-bold">{SKILL_LABEL[secondarySkill]}</span> jumps 60% → 80%.
+                  Clear it, English locks in another point.
                 </p>
               </div>
 

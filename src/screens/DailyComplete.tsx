@@ -35,7 +35,7 @@ export default function DailyCompleteScreen({
     >
       <div className="animate-fade-up">
         <h1 className="text-[26px] font-display font-semibold text-ink leading-tight">Day {day} done</h1>
-        <p className="text-[14px] text-ink-muted mt-1">Loop closed for today — here's what's waiting tomorrow.</p>
+        <p className="text-[14px] text-ink-muted mt-1">Today's loop closed. Here's tomorrow.</p>
       </div>
 
       <div className="mt-6">
@@ -62,7 +62,7 @@ export default function DailyCompleteScreen({
                 <div className="mt-3 flex items-center gap-3">
                   <span className="text-[34px] leading-none font-bold text-ink tabular-nums">{dueTomorrow}</span>
                   <p className="text-[14px] text-ink-muted leading-snug">
-                    cards come back tomorrow — the ones you missed, timed to hit right before you'd forget.
+                    cards come back tomorrow — timed to hit right before you'd forget.
                   </p>
                 </div>
               </Card>

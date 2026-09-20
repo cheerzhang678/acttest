@@ -32,8 +32,7 @@ export default function OnboardingScreen({
             then the fastest way to close them.
           </h1>
           <p className="mt-4 text-[16px] text-ink-muted leading-relaxed max-w-md">
-            No full mock test. A few adaptive questions is all it takes to see where you're strong,
-            where you're not, and what to drill each day — right in your browser.
+            No full mock test. A few adaptive questions — then a daily plan, right in your browser.
           </p>
 
           <div className="mt-7 rounded-3xl bg-ink text-white p-6 shadow-card max-w-md">
@@ -88,7 +87,7 @@ export default function OnboardingScreen({
           <div className="mt-5">
             <div className="text-[13px] font-semibold text-ink">Optional sections</div>
             <p className="text-[12px] text-ink-muted mt-0.5">
-              Only if your target colleges require them — they don't change your Composite.
+              Only if your colleges require them. Won't change your Composite.
             </p>
             <div className="mt-3 space-y-2">
               <Toggle
