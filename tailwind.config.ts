@@ -36,8 +36,12 @@ export default {
         }
       },
       fontFamily: {
+        // Kira's product uses Inter for headings too (e.g. "Welcome back, Trish!"),
+        // not a separate geometric display face. Keep display === Inter so the
+        // heading typeface matches the real app; headings lean on weight, not a
+        // different family.
         sans: ['Inter', 'ui-sans-serif', 'system-ui', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif'],
-        display: ['"Funnel Display"', 'Inter', 'ui-sans-serif', 'sans-serif']
+        display: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
       },
       boxShadow: {
         card: '0 1px 2px rgba(31,17,71,0.04), 0 10px 30px rgba(31,17,71,0.06)',

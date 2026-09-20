@@ -26,7 +26,7 @@ export default function OnboardingScreen({
       <div className="grid gap-8 lg:grid-cols-2 items-center lg:min-h-[70vh] animate-fade-up">
         {/* left — hero + the gap */}
         <div>
-          <h1 className="text-[32px] lg:text-[40px] leading-tight font-display font-bold text-ink">
+          <h1 className="text-[32px] lg:text-[40px] leading-tight font-display font-semibold text-ink">
             Let's find your gaps,
             <br />
             then the fastest way to close them.

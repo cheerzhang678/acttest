@@ -1,9 +1,9 @@
-import { TrendingUp, Target, CheckCircle2, Clock, ArrowRight, CalendarClock, RefreshCw, FlaskConical, PenLine } from 'lucide-react'
+import { Target, CheckCircle2, Clock, ArrowRight, CalendarClock, RefreshCw, FlaskConical, PenLine } from 'lucide-react'
 import type { ReactNode } from 'react'
 import type { CoreDomain, Skill } from '../types'
 import { SKILL_LABEL, SKILL_DOMAIN } from '../types'
 import type { Onboarding, Profile } from '../lib/profile'
-import { AppShell, TwoCol, Card, Meter, Pill, PrimaryButton } from '../components/ui'
+import { AppShell, TwoCol, Card, Meter, Pill, PrimaryButton, IconChip, DOMAIN_CHIP } from '../components/ui'
 
 const DOMAINS: CoreDomain[] = ['English', 'Math', 'Reading']
 
@@ -33,7 +33,7 @@ export default function PlanScreen({
       }
     >
       <div className="animate-fade-up">
-        <h1 className="text-[26px] font-display font-bold text-ink leading-tight">Your plan's ready</h1>
+        <h1 className="text-[26px] font-display font-semibold text-ink leading-tight">Your plan's ready</h1>
         <p className="text-[14px] text-ink-muted mt-1">
           Built from the {profile.answered} questions you just answered.
         </p>
@@ -146,10 +146,11 @@ export default function PlanScreen({
 }
 
 function WeakRow({ skill, estGain }: { skill: Skill; estGain: number }) {
+  const { icon, tone } = DOMAIN_CHIP[SKILL_DOMAIN[skill]]
   return (
     <div className="flex items-center justify-between rounded-2xl bg-surface border border-border px-4 py-3 shadow-card">
       <div className="flex items-center gap-3">
-        <TrendingUp size={17} className="text-accent" />
+        <IconChip icon={icon} tone={tone} size={38} />
         <div>
           <div className="text-[14px] font-semibold text-ink">{SKILL_LABEL[skill]}</div>
           <div className="text-[12px] text-ink-muted">{SKILL_DOMAIN[skill]}</div>

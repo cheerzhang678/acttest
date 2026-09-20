@@ -1,7 +1,8 @@
 import { Flame, ArrowRight, Sparkles, Trophy, Star } from 'lucide-react'
-import { SKILL_LABEL } from '../types'
+import type { Skill } from '../types'
+import { SKILL_LABEL, SKILL_DOMAIN } from '../types'
 import type { Onboarding, Profile } from '../lib/profile'
-import { AppShell, TwoCol, Card, Meter, Pill, PrimaryButton, GhostButton } from '../components/ui'
+import { AppShell, TwoCol, Card, Meter, Pill, PrimaryButton, GhostButton, IconChip, DOMAIN_CHIP } from '../components/ui'
 
 // Screen 5 — the day-7 milestone. Deliberately bigger than the daily recap.
 // What brings a student back at the one-week mark (where most self-study apps
@@ -20,8 +21,8 @@ export default function Day7Screen({
   onPractice: () => void
 }) {
   const newScore = Math.min(onb.target, profile.estComposite + 2)
-  const focusLabel = SKILL_LABEL[profile.focusSkill]
-  const secondary = profile.weakSkills[1] ? SKILL_LABEL[profile.weakSkills[1]] : 'Punctuation'
+  const focusSkill = profile.focusSkill
+  const secondarySkill: Skill = profile.weakSkills[1] ?? 'punctuation'
   const daysToTest = onb.weeks * 7 - 7
 
   return (
@@ -36,7 +37,7 @@ export default function Day7Screen({
         <span className="inline-flex items-center gap-1.5 text-[15px] font-bold text-ink">
           <Sparkles size={17} className="text-accent" /> One week in
         </span>
-        <h1 className="mt-4 text-[30px] font-display font-bold text-ink leading-tight max-w-2xl">
+        <h1 className="mt-4 text-[30px] font-display font-semibold text-ink leading-tight max-w-2xl">
           7 days. You've moved your ACT up 2 points.
         </h1>
       </div>
@@ -68,9 +69,9 @@ export default function Day7Screen({
               {/* mastery gains */}
               <Card>
                 <h2 className="text-[15px] font-bold text-ink mb-3">What you leveled up</h2>
-                <MasteryRow label={focusLabel} from={45} to={72} />
+                <MasteryRow skill={focusSkill} from={45} to={72} />
                 <div className="h-3" />
-                <MasteryRow label={secondary} from={38} to={60} />
+                <MasteryRow skill={secondarySkill} from={38} to={60} />
               </Card>
             </div>
           }
@@ -82,7 +83,7 @@ export default function Day7Screen({
                   <Trophy size={17} /> So close
                 </div>
                 <p className="mt-2 text-[14px] text-ink leading-relaxed">
-                  Two more days and <span className="font-bold">{secondary}</span> jumps 60% → 80%. Clear that
+                  Two more days and <span className="font-bold">{SKILL_LABEL[secondarySkill]}</span> jumps 60% → 80%. Clear that
                   tier and English locks in another point.
                 </p>
               </div>
@@ -99,16 +100,20 @@ export default function Day7Screen({
   )
 }
 
-function MasteryRow({ label, from, to }: { label: string; from: number; to: number }) {
+function MasteryRow({ skill, from, to }: { skill: Skill; from: number; to: number }) {
+  const { icon, tone } = DOMAIN_CHIP[SKILL_DOMAIN[skill]]
   return (
-    <div>
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-[14px] font-medium text-ink">{label}</span>
-        <span className="text-[13px] font-semibold text-ink-muted tabular-nums">
-          {from}% <span className="text-success">→ {to}%</span>
-        </span>
+    <div className="flex items-center gap-3">
+      <IconChip icon={icon} tone={tone} size={36} />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-[14px] font-medium text-ink truncate">{SKILL_LABEL[skill]}</span>
+          <span className="text-[13px] font-semibold text-ink-muted tabular-nums shrink-0">
+            {from}% <span className="text-success">→ {to}%</span>
+          </span>
+        </div>
+        <Meter value={to} tone="success" />
       </div>
-      <Meter value={to} tone="success" />
     </div>
   )
 }

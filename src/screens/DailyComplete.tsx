@@ -1,7 +1,7 @@
 import { Flame, CalendarClock, RotateCcw, ArrowRight, Check } from 'lucide-react'
-import { SKILL_LABEL } from '../types'
+import { SKILL_LABEL, SKILL_DOMAIN } from '../types'
 import type { Onboarding, Profile } from '../lib/profile'
-import { AppShell, TwoCol, Card, Pill, PrimaryButton } from '../components/ui'
+import { AppShell, TwoCol, Card, Pill, PrimaryButton, IconChip, DOMAIN_CHIP } from '../components/ui'
 
 // Days 1–6 recap (2.4). This is the *routine* end-of-session screen — smaller
 // than the day-7 milestone. Its job is the return trigger: close the loop today,
@@ -34,7 +34,7 @@ export default function DailyCompleteScreen({
       }
     >
       <div className="animate-fade-up">
-        <h1 className="text-[26px] font-display font-bold text-ink leading-tight">Day {day} done</h1>
+        <h1 className="text-[26px] font-display font-semibold text-ink leading-tight">Day {day} done</h1>
         <p className="text-[14px] text-ink-muted mt-1">Loop closed for today — here's what's waiting tomorrow.</p>
       </div>
 
@@ -42,6 +42,9 @@ export default function DailyCompleteScreen({
         <TwoCol
           left={
             <div className="rounded-3xl bg-success-soft p-6 text-center">
+              <div className="flex justify-center mb-3">
+                <IconChip {...DOMAIN_CHIP[SKILL_DOMAIN[profile.focusSkill]]} size={44} />
+              </div>
               <div className="text-[13px] font-semibold text-success">Today's set</div>
               <div className="mt-1 text-[48px] leading-none font-bold text-ink tabular-nums">
                 {correct}<span className="text-[24px] text-ink-muted">/{total}</span>

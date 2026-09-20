@@ -4,7 +4,7 @@ import type { DiagItem, CoreDomain } from '../types'
 import type { Onboarding, Profile } from '../lib/profile'
 import { DIAG_ITEMS } from '../data/items'
 import { buildProfile, warmStartDifficulty, reportConfidence } from '../lib/profile'
-import { AppShell, TwoCol, Card, Meter, Pill, PrimaryButton, GhostButton } from '../components/ui'
+import { AppShell, TwoCol, Card, Meter, Pill } from '../components/ui'
 
 const FLOOR = 5 // enough signal for a usable plan — first checkpoint
 const CAP = 10 // hard ceiling — never out-stay the student's patience
@@ -98,7 +98,7 @@ export default function DiagnosticScreen({
           <div className="flex items-center gap-2 text-success font-bold text-[15px]">
             <Check size={18} /> Enough for a solid plan
           </div>
-          <h1 className="mt-3 text-[26px] font-display font-bold text-ink leading-tight">
+          <h1 className="mt-3 text-[26px] font-display font-semibold text-ink leading-tight">
             You've answered {answeredCount}. I can build your plan now.
           </h1>
 
@@ -128,15 +128,21 @@ export default function DiagnosticScreen({
             </p>
           </Card>
 
+          {/* Two matched pills — same shape/size, differing only in color:
+              filled accent = recommended (build plan), outlined = keep testing. */}
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
-            <div className="sm:flex-1">
-              <PrimaryButton onClick={() => finish(answers)}>Build my plan now</PrimaryButton>
-            </div>
-            <div className="sm:flex-1">
-              <GhostButton onClick={() => { setPaused(false); advance(answers, targetDiff) }}>
-                Answer {more} more for a sharper read →
-              </GhostButton>
-            </div>
+            <button
+              onClick={() => finish(answers)}
+              className="sm:flex-1 w-full rounded-full bg-accent text-white font-semibold py-3.5 text-[15px] text-center transition active:scale-[0.98] hover:bg-accent/90"
+            >
+              Build my plan now
+            </button>
+            <button
+              onClick={() => { setPaused(false); advance(answers, targetDiff) }}
+              className="sm:flex-1 w-full rounded-full bg-transparent border border-accent text-accent font-semibold py-3.5 text-[15px] text-center transition active:scale-[0.98] hover:bg-accent-soft"
+            >
+              Answer {more} more for a sharper read →
+            </button>
           </div>
         </div>
       </AppShell>

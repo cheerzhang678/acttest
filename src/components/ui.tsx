@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { BarChart3, BookOpen, GraduationCap, Home, PenTool, Sparkles } from 'lucide-react'
+import { BarChart3, BookOpen, BookText, Calculator, FlaskConical, GraduationCap, Home, PenTool, Sparkles } from 'lucide-react'
+import type { Domain } from '../types'
 
 // Kira app shell: a fixed dark violet icon rail on the left + a light lavender
 // content area on the right. This mirrors the real product (teacher/student app)
@@ -12,7 +13,7 @@ export function AppShell({ children, headerRight }: { children: ReactNode; heade
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="sticky top-0 z-10 h-14 flex items-center justify-between px-6 lg:px-10 border-b border-border/70 bg-bg/70 backdrop-blur">
           <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-ink-muted">
-            <span className="sm:hidden font-display font-bold text-ink">Kira ACT</span>
+            <span className="sm:hidden font-display font-semibold text-ink">Kira ACT</span>
             <span className="hidden sm:inline">ACT Prep</span>
           </span>
           {headerRight ? <div className="flex items-center gap-2">{headerRight}</div> : <span />}
@@ -109,6 +110,15 @@ export function IconChip({
       <Icon size={Math.round(size * 0.5)} />
     </span>
   )
+}
+
+// One consistent icon + tint per ACT domain — reused wherever a skill/domain is
+// listed (Plan levers, Day-7 mastery rows) so the icon language stays unified.
+export const DOMAIN_CHIP: Record<Domain, { icon: LucideIcon; tone: ChipTone }> = {
+  English: { icon: BookOpen, tone: 'violet' },
+  Math: { icon: Calculator, tone: 'blue' },
+  Reading: { icon: BookText, tone: 'mint' },
+  Science: { icon: FlaskConical, tone: 'pink' }
 }
 
 export function PrimaryButton({
