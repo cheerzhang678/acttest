@@ -3,7 +3,7 @@ import { Lightbulb, Check, ChevronDown, ChevronRight, ArrowRight, ArrowLeft, Tre
 import type { PracticeItem } from '../types'
 import { PRACTICE_ITEMS } from '../data/items'
 import type { Profile } from '../lib/profile'
-import { PrimaryButton, Pill, Meter } from '../components/ui'
+import { AppShell, TwoCol, Card, PrimaryButton, Pill, Meter } from '../components/ui'
 
 // Screen 4 — daily practice with layered AI feedback (key moment #2).
 // The whole point is *when the AI talks and when it shuts up*:
@@ -17,6 +17,8 @@ import { PrimaryButton, Pill, Meter } from '../components/ui'
 //   • rhetoric-aware: judgment questions get a goal-reflection prompt first, and
 //     the AI stays restrained — reasoning from the passage + an uncertainty flag,
 //     not a confident verdict.
+// Desktop: left = the question, right = the AI coaching rail (progress, streak,
+// layered feedback, nav) — feedback sits beside the question, not below it.
 type Phase = 'answering' | 'hint' | 'resolved'
 
 interface Rec {
@@ -28,9 +30,11 @@ interface Rec {
 
 export default function PracticeScreen({
   profile,
+  day,
   onDone
 }: {
   profile: Profile
+  day?: number
   onDone: () => void
 }) {
   // Lead with the skill today's plan targeted, for continuity from the Plan screen.
@@ -95,129 +99,153 @@ export default function PracticeScreen({
   const answeredSoFar = Object.keys(records).length
 
   return (
-    <div className="flex flex-col h-full px-6 pt-4 pb-6">
-      {/* header — 2.3: total progress bar + "Question X of Y" */}
-      <div className="shrink-0">
-        <div className="flex items-center justify-between mb-2">
-          <button
-            onClick={back}
-            disabled={idx === 0}
-            className="inline-flex items-center gap-1 text-[13px] font-semibold text-ink-muted disabled:opacity-30 active:scale-95 transition"
-          >
-            <ArrowLeft size={15} /> Back
-          </button>
-          <span className="text-[13px] font-semibold text-ink-muted">
-            Question {idx + 1} of {items.length} · {item.domain}
-          </span>
-        </div>
-        <Meter value={((idx + (phase === 'resolved' ? 1 : 0)) / items.length) * 100} />
-      </div>
-
-      {/* question */}
-      <div key={item.id} className="flex-1 mt-5 animate-fade-up overflow-y-auto no-scrollbar">
-        {streak >= 2 && phase === 'answering' && (
-          <div className="mb-3">
-            <Pill tone="accent">
-              <TrendingUp size={13} /> {streak} in a row · leveling you up
-            </Pill>
-          </div>
-        )}
-
-        {/* rhetoric: goal-reflection prompt shown BEFORE answering */}
-        {item.kind === 'rhetoric' && item.goalQuestion && phase === 'answering' && (
-          <div className="mb-3 rounded-2xl bg-accent-soft/60 border border-accent/20 p-3.5">
-            <div className="flex items-center gap-2 text-accent font-bold text-[13px]">
-              <HelpCircle size={15} /> First, think it through
+    <AppShell
+      headerRight={
+        <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-ink-muted">
+          {day ? `Day ${day}` : 'Today'} · {item.domain}
+        </span>
+      }
+    >
+      <TwoCol
+        left={
+          <div key={item.id} className="animate-fade-up">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-[13px] font-semibold text-ink-muted">Question {idx + 1} of {items.length}</span>
+              <Pill tone="accent">{item.domain}</Pill>
             </div>
-            <p className="mt-1.5 text-[13px] text-ink leading-relaxed">{item.goalQuestion}</p>
-          </div>
-        )}
 
-        <div className="rounded-2xl bg-surface border border-border p-4 text-[15px] leading-relaxed text-ink shadow-card">
-          <Passage text={item.passage} underline={item.underline} />
-        </div>
-        <p className="mt-4 text-[15px] font-semibold text-ink">{item.prompt}</p>
+            <Card className="text-[16px] leading-relaxed">
+              <Passage text={item.passage} underline={item.underline} />
+            </Card>
+            <p className="mt-4 text-[16px] font-semibold text-ink">{item.prompt}</p>
 
-        <div className="mt-4 space-y-2.5">
-          {item.choices.map((c, i) => (
-            <Option key={c.label} label={c.label} text={c.text} state={optionState(i)} onClick={() => pick(i)} />
-          ))}
-        </div>
-
-        {/* feedback zone */}
-        {phase === 'hint' && (
-          <div className="mt-4 rounded-2xl bg-warn-soft border border-warn/30 p-4 animate-pop">
-            <div className="flex items-center gap-2 text-warn font-bold text-[14px]">
-              <Lightbulb size={16} /> {mastered ? 'Probably just a slip' : 'Hang on — one hint'}
+            <div className="mt-4 space-y-2.5">
+              {item.choices.map((c, i) => (
+                <Option key={c.label} label={c.label} text={c.text} state={optionState(i)} onClick={() => pick(i)} />
+              ))}
             </div>
-            <p className="mt-2 text-[14px] text-ink leading-relaxed">
-              {mastered ? "You've nailed this one before. Take another look — you've got it." : item.hint}
-            </p>
-            <p className="mt-2 text-[12px] text-ink-muted">Pick again — finding it yourself makes it stick.</p>
           </div>
-        )}
+        }
+        right={
+          <div className="space-y-4">
+            <Card>
+              <div className="text-[13px] font-semibold text-ink-muted mb-2">Progress</div>
+              <Meter value={((idx + (phase === 'resolved' ? 1 : 0)) / items.length) * 100} />
+              <div className="mt-2 text-[12px] text-ink-muted">
+                {idx + 1} of {items.length} · focus: {item.domain}
+              </div>
+              {streak >= 2 && (
+                <div className="mt-3">
+                  <Pill tone="accent">
+                    <TrendingUp size={13} /> {streak} in a row · leveling you up
+                  </Pill>
+                </div>
+              )}
+            </Card>
 
-        {phase === 'resolved' && resolvedCorrect && rec?.correctOnFirst && (
-          <div className="mt-4 rounded-2xl bg-success-soft border border-success/30 p-4 animate-pop">
-            <div className="flex items-center gap-2 text-success font-bold text-[14px]">
-              <Check size={16} /> {item.confirm}
-            </div>
-            <button
-              onClick={() => setShowRule((v) => !v)}
-              className="mt-2 flex items-center gap-1 text-[13px] font-medium text-ink-muted"
-            >
-              {showRule ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
-              Why (only if you want it)
-            </button>
-            {showRule && (
-              <p className="mt-1.5 text-[13px] text-ink leading-relaxed animate-fade-up">{item.takeaway}</p>
-            )}
-          </div>
-        )}
-
-        {phase === 'resolved' && resolvedCorrect && !rec?.correctOnFirst && (
-          <div className="mt-4 rounded-2xl bg-success-soft border border-success/30 p-4 animate-pop">
-            <div className="flex items-center gap-2 text-success font-bold text-[14px]">
-              <Check size={16} /> Got there yourself 👏
-            </div>
-            <p className="mt-2 text-[14px] text-ink leading-relaxed">{item.takeaway}</p>
-          </div>
-        )}
-
-        {phase === 'resolved' && !resolvedCorrect && (
-          <div className="mt-4 rounded-2xl bg-surface border border-border p-4 shadow-card animate-pop">
-            <div className="flex items-center gap-2 text-ink font-bold text-[14px]">
-              <span className="text-accent">{item.ruleTitle}</span>
-            </div>
-            {/* rhetoric: lead with the AI's uncertainty flag — restrained, not a verdict */}
-            {item.kind === 'rhetoric' && item.aiCaveat && (
-              <div className="mt-2 flex items-start gap-2 rounded-xl bg-warn-soft/60 px-3 py-2 text-[12px] text-ink leading-relaxed">
-                <ShieldQuestion size={14} className="mt-0.5 shrink-0 text-warn" />
-                <span>{item.aiCaveat}</span>
+            {/* AI coaching rail — restrained by default, opens up only when useful */}
+            {/* rhetoric: goal-reflection prompt shown BEFORE answering */}
+            {phase === 'answering' && item.kind === 'rhetoric' && item.goalQuestion && (
+              <div className="rounded-2xl bg-accent-soft/60 border border-accent/20 p-4">
+                <div className="flex items-center gap-2 text-accent font-bold text-[13px]">
+                  <HelpCircle size={15} /> First, think it through
+                </div>
+                <p className="mt-1.5 text-[13px] text-ink leading-relaxed">{item.goalQuestion}</p>
               </div>
             )}
-            <p className="mt-2 text-[14px] text-ink leading-relaxed">
-              {mastered ? item.takeaway : item.explanation}
-            </p>
-            {!mastered && (
-              <div className="mt-3 rounded-xl bg-accent-soft px-3 py-2 text-[13px] text-accent font-medium leading-relaxed">
-                💡 {item.takeaway}
+
+            {phase === 'answering' && !(item.kind === 'rhetoric' && item.goalQuestion) && (
+              <p className="text-[13px] text-ink-muted leading-relaxed px-1">
+                Pick the answer you think is best — I'll only jump in if it helps.
+              </p>
+            )}
+
+            {phase === 'hint' && (
+              <div className="rounded-2xl bg-warn-soft border border-warn/30 p-4 animate-pop">
+                <div className="flex items-center gap-2 text-warn font-bold text-[14px]">
+                  <Lightbulb size={16} /> {mastered ? 'Probably just a slip' : 'Hang on — one hint'}
+                </div>
+                <p className="mt-2 text-[14px] text-ink leading-relaxed">
+                  {mastered ? "You've nailed this one before. Take another look — you've got it." : item.hint}
+                </p>
+                <p className="mt-2 text-[12px] text-ink-muted">Pick again — finding it yourself makes it stick.</p>
               </div>
             )}
-          </div>
-        )}
-      </div>
 
-      {/* nav */}
-      {phase === 'resolved' && (
-        <div className="shrink-0 pt-3 animate-fade-up">
-          <PrimaryButton onClick={next}>
-            {idx + 1 >= items.length ? `Finish (${answeredSoFar} done)` : 'Next'}
-            <ArrowRight size={16} className="inline ml-1 -mt-0.5" />
-          </PrimaryButton>
-        </div>
-      )}
-    </div>
+            {phase === 'resolved' && resolvedCorrect && rec?.correctOnFirst && (
+              <div className="rounded-2xl bg-success-soft border border-success/30 p-4 animate-pop">
+                <div className="flex items-center gap-2 text-success font-bold text-[14px]">
+                  <Check size={16} /> {item.confirm}
+                </div>
+                <button
+                  onClick={() => setShowRule((v) => !v)}
+                  className="mt-2 flex items-center gap-1 text-[13px] font-medium text-ink-muted"
+                >
+                  {showRule ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
+                  Why (only if you want it)
+                </button>
+                {showRule && (
+                  <p className="mt-1.5 text-[13px] text-ink leading-relaxed animate-fade-up">{item.takeaway}</p>
+                )}
+              </div>
+            )}
+
+            {phase === 'resolved' && resolvedCorrect && !rec?.correctOnFirst && (
+              <div className="rounded-2xl bg-success-soft border border-success/30 p-4 animate-pop">
+                <div className="flex items-center gap-2 text-success font-bold text-[14px]">
+                  <Check size={16} /> Got there yourself 👏
+                </div>
+                <p className="mt-2 text-[14px] text-ink leading-relaxed">{item.takeaway}</p>
+              </div>
+            )}
+
+            {phase === 'resolved' && !resolvedCorrect && (
+              <div className="rounded-2xl bg-surface border border-border p-4 shadow-card animate-pop">
+                <div className="flex items-center gap-2 text-ink font-bold text-[14px]">
+                  <span className="text-accent">{item.ruleTitle}</span>
+                </div>
+                {/* rhetoric: lead with the AI's uncertainty flag — restrained, not a verdict */}
+                {item.kind === 'rhetoric' && item.aiCaveat && (
+                  <div className="mt-2 flex items-start gap-2 rounded-xl bg-warn-soft/60 px-3 py-2 text-[12px] text-ink leading-relaxed">
+                    <ShieldQuestion size={14} className="mt-0.5 shrink-0 text-warn" />
+                    <span>{item.aiCaveat}</span>
+                  </div>
+                )}
+                <p className="mt-2 text-[14px] text-ink leading-relaxed">
+                  {mastered ? item.takeaway : item.explanation}
+                </p>
+                {!mastered && (
+                  <div className="mt-3 rounded-xl bg-accent-soft px-3 py-2 text-[13px] text-accent font-medium leading-relaxed">
+                    💡 {item.takeaway}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* nav */}
+            <div className="flex items-center gap-3 pt-1">
+              <button
+                onClick={back}
+                disabled={idx === 0}
+                className="inline-flex items-center gap-1 text-[13px] font-semibold text-ink-muted disabled:opacity-30 active:scale-95 transition"
+              >
+                <ArrowLeft size={15} /> Back
+              </button>
+              <div className="flex-1">
+                {phase === 'resolved' && (
+                  <div className="animate-fade-up">
+                    <PrimaryButton onClick={next}>
+                      {idx + 1 >= items.length ? `Finish (${answeredSoFar} done)` : 'Next'}
+                      <ArrowRight size={16} className="inline ml-1 -mt-0.5" />
+                    </PrimaryButton>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        }
+      />
+    </AppShell>
   )
 }
 
@@ -241,7 +269,7 @@ function Option({
           ? 'border-border bg-surface opacity-50'
           : state === 'disabled'
             ? 'border-danger/40 bg-danger-soft/40 opacity-60'
-            : 'border-border bg-surface active:scale-[0.99]'
+            : 'border-border bg-surface hover:border-accent/40 active:scale-[0.99]'
   return (
     <button
       onClick={onClick}

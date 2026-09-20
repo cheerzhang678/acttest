@@ -4,7 +4,7 @@ import type { DiagItem, Domain } from '../types'
 import type { Onboarding, Profile } from '../lib/profile'
 import { DIAG_ITEMS } from '../data/items'
 import { buildProfile, warmStartDifficulty, reportConfidence } from '../lib/profile'
-import { Meter, PrimaryButton, GhostButton } from '../components/ui'
+import { AppShell, TwoCol, Card, Meter, Pill, PrimaryButton, GhostButton } from '../components/ui'
 
 const FLOOR = 5 // enough signal for a usable plan — first checkpoint
 const CAP = 10 // hard ceiling — never out-stay the student's patience
@@ -33,9 +33,9 @@ function domainCounts(answeredIds: Set<string>): Record<Domain, number> {
 
 // Screen 2 — the adaptive diagnostic (key moment #1).
 // Get enough profiling signal BEFORE the student loses patience. Levers, all
-// visible: a short adaptive set warm-started from their current score, a "N more
-// to unlock" hook, per-domain confirmation chips, and — at the floor — an honest
-// checkpoint that shows the accuracy tradeoff so THEY decide whether to go on.
+// visible in the right rail: a short adaptive set warm-started from their score,
+// a "N more to unlock" hook, per-domain confirmation chips, and — at the floor —
+// an honest checkpoint showing the accuracy tradeoff so THEY decide to go on.
 export default function DiagnosticScreen({
   onb,
   onDone
@@ -48,7 +48,7 @@ export default function DiagnosticScreen({
   const [targetDiff, setTargetDiff] = useState<number>(warm)
   const [current, setCurrent] = useState<DiagItem>(() => pickNext(new Set(), warm)!)
   const [picked, setPicked] = useState<number | null>(null)
-  const [paused, setPaused] = useState(false) // at a checkpoint, waiting on the student
+  const [paused, setPaused] = useState(false)
 
   const answeredCount = Object.keys(answers).length
   const untilPlan = Math.max(0, FLOOR - answeredCount)
@@ -76,7 +76,6 @@ export default function DiagnosticScreen({
       const nextDiff = Math.max(1, Math.min(3, targetDiff + (correct ? 1 : -1)))
       const n = Object.keys(nextAnswers).length
       if (n >= CAP) return finish(nextAnswers)
-      // Reached the floor (or beyond): pause and let the student choose.
       if (n >= FLOOR) {
         setAnswers(nextAnswers)
         setTargetDiff(nextDiff)
@@ -85,7 +84,7 @@ export default function DiagnosticScreen({
         return
       }
       advance(nextAnswers, nextDiff)
-    }, 560)
+    }, 520)
   }
 
   // ---- Checkpoint (2.2): show the accuracy tradeoff, let the student decide ----
@@ -94,124 +93,132 @@ export default function DiagnosticScreen({
     const confMax = reportConfidence(CAP)
     const more = CAP - answeredCount
     return (
-      <div className="flex flex-col h-full px-6 pt-6 pb-6 animate-fade-up">
-        <div className="flex items-center gap-2 text-success font-bold text-[15px]">
-          <Check size={18} /> Enough for a solid plan
-        </div>
-        <h1 className="mt-4 text-[22px] font-bold text-ink leading-tight">
-          You've answered {answeredCount}. I can build your plan now.
-        </h1>
-
-        {/* per-domain confirmation */}
-        <div className="mt-5 flex flex-wrap gap-2">
-          {ALL_DOMAINS.map((d) => (
-            <span
-              key={d}
-              className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[13px] font-semibold ${
-                counts[d] > 0 ? 'bg-success-soft text-success' : 'bg-surface-2 text-ink-muted'
-              }`}
-            >
-              {counts[d] > 0 && <Check size={13} />} {d} {counts[d] > 0 ? 'read' : 'light'}
-            </span>
-          ))}
-        </div>
-
-        {/* the tradeoff, stated honestly */}
-        <div className="mt-6 rounded-3xl bg-surface border border-border p-5 shadow-card">
-          <div className="flex items-center gap-2 text-[13px] font-semibold text-ink-muted">
-            <Gauge size={15} /> How dialed-in your report is
+      <AppShell headerRight={<Pill tone="success"><Check size={13} /> Plan ready</Pill>}>
+        <div className="mx-auto max-w-xl animate-fade-up">
+          <div className="flex items-center gap-2 text-success font-bold text-[15px]">
+            <Check size={18} /> Enough for a solid plan
           </div>
-          <div className="mt-3 space-y-3">
-            <ConfRow label={`Stop now (${answeredCount} questions)`} value={confNow} tone="accent" />
-            <ConfRow label={`Answer ${more} more (${CAP} total)`} value={confMax} tone="success" />
+          <h1 className="mt-3 text-[26px] font-bold text-ink leading-tight">
+            You've answered {answeredCount}. I can build your plan now.
+          </h1>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            {ALL_DOMAINS.map((d) => (
+              <span
+                key={d}
+                className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[13px] font-semibold ${
+                  counts[d] > 0 ? 'bg-success-soft text-success' : 'bg-surface-2 text-ink-muted'
+                }`}
+              >
+                {counts[d] > 0 && <Check size={13} />} {d} {counts[d] > 0 ? 'read' : 'light'}
+              </span>
+            ))}
           </div>
-          <p className="mt-3 text-[13px] text-ink-muted leading-relaxed">
-            Either way your plan updates itself as you practice — day-1 doesn't have to be perfect.
-          </p>
-        </div>
 
-        <div className="flex-1 min-h-4" />
+          <Card className="mt-6">
+            <div className="flex items-center gap-2 text-[13px] font-semibold text-ink-muted">
+              <Gauge size={15} /> How dialed-in your report is
+            </div>
+            <div className="mt-3 space-y-3">
+              <ConfRow label={`Stop now (${answeredCount} questions)`} value={confNow} tone="accent" />
+              <ConfRow label={`Answer ${more} more (${CAP} total)`} value={confMax} tone="success" />
+            </div>
+            <p className="mt-3 text-[13px] text-ink-muted leading-relaxed">
+              Either way your plan updates itself as you practice — day-1 doesn't have to be perfect.
+            </p>
+          </Card>
 
-        <div className="space-y-2">
-          <PrimaryButton onClick={() => finish(answers)}>Build my plan now</PrimaryButton>
-          <GhostButton onClick={() => { setPaused(false); advance(answers, targetDiff) }}>
-            Answer {more} more for a sharper read →
-          </GhostButton>
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <div className="sm:flex-1">
+              <PrimaryButton onClick={() => finish(answers)}>Build my plan now</PrimaryButton>
+            </div>
+            <div className="sm:flex-1">
+              <GhostButton onClick={() => { setPaused(false); advance(answers, targetDiff) }}>
+                Answer {more} more for a sharper read →
+              </GhostButton>
+            </div>
+          </div>
         </div>
-      </div>
+      </AppShell>
     )
   }
 
   return (
-    <div className="flex flex-col h-full px-6 pt-4 pb-6">
-      {/* progress + hook */}
-      <div className="shrink-0">
-        <div className="flex items-center justify-between mb-2">
-          <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-ink-muted">
-            Question {answeredCount + 1}
-            <span className="rounded-full bg-accent-soft text-accent px-2 py-0.5 text-[11px] font-semibold">
-              {current.domain}
-            </span>
-          </span>
-          <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-accent">
-            <Zap size={14} />
-            {untilPlan > 0 ? `${untilPlan} more to unlock your plan` : 'Plan ready'}
-          </span>
-        </div>
-        <Meter value={(Math.min(answeredCount, FLOOR) / FLOOR) * 100} />
-        <div className="mt-2 flex gap-1.5">
-          {ALL_DOMAINS.map((d) => (
-            <span
-              key={d}
-              className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-                counts[d] > 0 ? 'bg-success-soft text-success' : 'bg-surface-2 text-ink-muted'
-              }`}
-            >
-              {counts[d] > 0 ? '✓ ' : ''}{d}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* question */}
-      <div key={current.id} className="flex-1 mt-6 animate-fade-up">
-        <div className="text-[13px] font-semibold text-accent mb-2">
-          difficulty {'●'.repeat(current.difficulty)}{'○'.repeat(3 - current.difficulty)}
-        </div>
-        {current.passage && (
-          <div className="rounded-2xl bg-surface border border-border p-4 text-[15px] leading-relaxed text-ink shadow-card">
-            <Passage text={current.passage} underline={current.underline} />
+    <AppShell
+      headerRight={
+        <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-accent">
+          <Zap size={14} />
+          {untilPlan > 0 ? `${untilPlan} more to unlock your plan` : 'Plan ready'}
+        </span>
+      }
+    >
+      <TwoCol
+        left={
+          <div key={current.id} className="animate-fade-up">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-[13px] font-semibold text-ink-muted">Question {answeredCount + 1}</span>
+              <Pill tone="accent">{current.domain}</Pill>
+            </div>
+            {current.passage && (
+              <Card className="text-[16px] leading-relaxed">
+                <Passage text={current.passage} underline={current.underline} />
+              </Card>
+            )}
+            <p className="mt-4 text-[16px] font-semibold text-ink">{current.prompt}</p>
+            <div className="mt-4 space-y-2.5">
+              {current.choices.map((c, i) => (
+                <Option
+                  key={c.label}
+                  label={c.label}
+                  text={c.text}
+                  state={
+                    picked === null
+                      ? 'idle'
+                      : i === current.correct
+                        ? 'correct'
+                        : i === picked
+                          ? 'wrong'
+                          : 'dim'
+                  }
+                  onClick={() => select(i)}
+                />
+              ))}
+            </div>
           </div>
-        )}
-        <p className="mt-4 text-[15px] font-semibold text-ink">{current.prompt}</p>
+        }
+        right={
+          <Card>
+            <div className="text-[13px] font-semibold text-ink-muted mb-2">Progress to your plan</div>
+            <Meter value={(Math.min(answeredCount, FLOOR) / FLOOR) * 100} />
+            <div className="mt-2 text-[12px] text-ink-muted">
+              {untilPlan > 0 ? `${untilPlan} more to unlock` : 'Ready — keep going for a sharper read'}
+            </div>
 
-        <div className="mt-4 space-y-2.5">
-          {current.choices.map((c, i) => (
-            <Option
-              key={c.label}
-              label={c.label}
-              text={c.text}
-              state={
-                picked === null
-                  ? 'idle'
-                  : i === current.correct
-                    ? 'correct'
-                    : i === picked
-                      ? 'wrong'
-                      : 'dim'
-              }
-              onClick={() => select(i)}
-            />
-          ))}
-        </div>
-      </div>
+            <div className="mt-5 text-[13px] font-semibold text-ink-muted mb-2">Domains covered</div>
+            <div className="flex flex-wrap gap-1.5">
+              {ALL_DOMAINS.map((d) => (
+                <span
+                  key={d}
+                  className={`text-[12px] font-semibold px-2.5 py-1 rounded-full ${
+                    counts[d] > 0 ? 'bg-success-soft text-success' : 'bg-surface-2 text-ink-muted'
+                  }`}
+                >
+                  {counts[d] > 0 ? '✓ ' : ''}{d}
+                </span>
+              ))}
+            </div>
 
-      <div className="shrink-0 pt-3">
-        <p className="text-center text-[12px] text-ink-muted py-1">
-          Questions get harder or easier based on your answers.
-        </p>
-      </div>
-    </div>
+            <div className="mt-5 text-[13px] font-semibold text-ink-muted mb-1">This question</div>
+            <div className="text-[13px] text-accent font-semibold">
+              difficulty {'●'.repeat(current.difficulty)}{'○'.repeat(3 - current.difficulty)}
+            </div>
+            <p className="mt-3 text-[12px] text-ink-muted leading-relaxed">
+              Questions get harder or easier based on your answers.
+            </p>
+          </Card>
+        }
+      />
+    </AppShell>
   )
 }
 
@@ -245,7 +252,7 @@ function Option({
         ? 'border-danger bg-danger-soft'
         : state === 'dim'
           ? 'border-border bg-surface opacity-50'
-          : 'border-border bg-surface active:scale-[0.99]'
+          : 'border-border bg-surface hover:border-accent/40 active:scale-[0.99]'
   return (
     <button
       onClick={onClick}
@@ -259,7 +266,6 @@ function Option({
   )
 }
 
-// Render a passage, underlining the portion under revision.
 function Passage({ text, underline }: { text: string; underline?: string }) {
   if (!underline) return <p>{text}</p>
   const idx = text.indexOf(underline)

@@ -1,28 +1,50 @@
 import type { ReactNode } from 'react'
-import { Signal, Wifi, BatteryFull } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 
-// A centered iPhone-style frame so the mobile-first prototype reads as an app
-// on desktop too. On small screens it fills the viewport.
-export function PhoneShell({ children }: { children: ReactNode }) {
+// Desktop / Chromebook-first web shell. Kira ships as district Chromebook web,
+// so the prototype is a real responsive web app — not a phone frame. It reads
+// for wide screens (two-column screens below) and gracefully stacks on narrow.
+export function AppShell({ children, headerRight }: { children: ReactNode; headerRight?: ReactNode }) {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-0 sm:p-6">
-      <div className="relative w-full sm:w-[402px] h-[100dvh] sm:h-[844px] bg-bg sm:rounded-[44px] sm:shadow-phone overflow-hidden sm:border-[10px] sm:border-black flex flex-col">
-        <StatusBar />
-        <div className="flex-1 overflow-y-auto no-scrollbar">{children}</div>
-      </div>
+    <div className="min-h-screen w-full bg-bg text-ink flex flex-col">
+      <header className="sticky top-0 z-10 border-b border-border bg-bg/80 backdrop-blur">
+        <div className="mx-auto w-full max-w-5xl px-6 h-14 flex items-center justify-between">
+          <span className="inline-flex items-center gap-2 font-bold text-[15px] text-accent">
+            <Sparkles size={18} /> Kira ACT
+          </span>
+          {headerRight && <div className="flex items-center gap-2">{headerRight}</div>}
+        </div>
+      </header>
+      <main className="flex-1 w-full">
+        <div className="mx-auto w-full max-w-5xl px-6 py-8">{children}</div>
+      </main>
     </div>
   )
 }
 
-function StatusBar() {
+// Two-column layout: primary content left, contextual panel right. Stacks below lg.
+export function TwoCol({
+  left,
+  right,
+  stickyRight = true
+}: {
+  left: ReactNode
+  right: ReactNode
+  stickyRight?: boolean
+}) {
   return (
-    <div className="flex items-center justify-between px-6 pt-3 pb-1 text-ink text-[13px] font-semibold shrink-0 bg-bg">
-      <span>9:41</span>
-      <div className="flex items-center gap-1.5">
-        <Signal size={15} strokeWidth={2.5} />
-        <Wifi size={15} strokeWidth={2.5} />
-        <BatteryFull size={18} strokeWidth={2} />
-      </div>
+    <div className="grid gap-6 lg:grid-cols-[1fr_360px] items-start">
+      <div className="min-w-0 animate-fade-up">{left}</div>
+      <div className={stickyRight ? 'lg:sticky lg:top-20' : ''}>{right}</div>
+    </div>
+  )
+}
+
+// Light card wrapper reused across screens.
+export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return (
+    <div className={`rounded-3xl bg-surface border border-border p-5 shadow-card ${className}`}>
+      {children}
     </div>
   )
 }
@@ -40,7 +62,7 @@ export function PrimaryButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="w-full rounded-2xl bg-accent text-white font-semibold py-3.5 text-[15px] transition active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100"
+      className="w-full rounded-2xl bg-accent text-white font-semibold py-3.5 text-[15px] transition active:scale-[0.98] hover:bg-accent/90 disabled:opacity-40 disabled:active:scale-100"
     >
       {children}
     </button>
@@ -51,7 +73,7 @@ export function GhostButton({ children, onClick }: { children: ReactNode; onClic
   return (
     <button
       onClick={onClick}
-      className="w-full rounded-2xl bg-transparent text-ink-muted font-medium py-2.5 text-[14px] transition active:scale-[0.98]"
+      className="w-full rounded-2xl bg-transparent text-ink-muted font-medium py-2.5 text-[14px] transition active:scale-[0.98] hover:text-ink"
     >
       {children}
     </button>

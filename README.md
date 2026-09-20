@@ -13,9 +13,11 @@ npm run build    # 类型检查 + 生产构建
 > 本机 node 在 `~/bin/node`,若 `npm` 未就绪可用:
 > `node ~/lib/node_modules/npm/bin/npm-cli.js install`
 
-## 流程(手机优先,5 屏)
+## 流程(桌面 / Chromebook 优先,响应式两栏,6 屏)
 
-首次进入 → 自适应诊断 → 个性化计划 → 每日练习 + AI 分层反馈 → 第 7 天回访。
+首次进入 → 自适应诊断 → 个性化计划 → 每日练习 + AI 分层反馈 → 每日回访(Day 1–6)→ 第 7 天里程碑。
+
+> 形态为**学区内 Chromebook Web**:宽屏(`lg` ≥1024px)两栏(左题目 / 右画像·计划·分层反馈),窄屏自动堆叠为单栏。不做原生 / 手机 App——见 [DESIGN_NOTES.md](./DESIGN_NOTES.md) 关键决策 0。
 
 两个重点打磨的关键时刻:
 1. **诊断**——自适应 + 进度钩子 + 早停逃生舱,在学生失去耐心前拿到画像。
@@ -27,9 +29,9 @@ npm run build    # 类型检查 + 生产构建
 
 ```
 src/
-  App.tsx              step 状态机 + 手机框
-  screens/             Onboarding / Diagnostic / Plan / Practice / Day7
-  components/ui.tsx     PhoneShell / 按钮 / Meter / Pill
+  App.tsx              step 状态机(onboarding→diagnostic→plan→practice→daily→day7)
+  screens/             Onboarding / Diagnostic / Plan / Practice / DailyComplete / Day7
+  components/ui.tsx     AppShell / TwoCol / Card / 按钮 / Meter / Pill
   lib/profile.ts        诊断 → 强弱项画像
   data/items.ts         真实 ACT 风格题库 + 分层反馈内容
   types.ts              领域/考点分类与题目类型

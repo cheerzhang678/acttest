@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import type { Onboarding, Profile } from './lib/profile'
-import { PhoneShell } from './components/ui'
 import OnboardingScreen from './screens/Onboarding'
 import DiagnosticScreen from './screens/Diagnostic'
 import PlanScreen from './screens/Plan'
@@ -19,7 +18,7 @@ export default function App() {
   const [day, setDay] = useState(1)
 
   return (
-    <PhoneShell>
+    <>
       {step === 'onboarding' && (
         <OnboardingScreen
           initial={onb}
@@ -47,6 +46,7 @@ export default function App() {
       {step === 'practice' && profile && (
         <PracticeScreen
           profile={profile}
+          day={day}
           onDone={() => setStep(day >= 7 ? 'day7' : 'daily')}
         />
       )}
@@ -80,6 +80,6 @@ export default function App() {
           onPractice={() => setStep('practice')}
         />
       )}
-    </PhoneShell>
+    </>
   )
 }
