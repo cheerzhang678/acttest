@@ -49,6 +49,10 @@ export default function DiagnosticScreen({
   const [current, setCurrent] = useState<DiagItem>(() => pickNext(new Set(), warm)!)
   const [picked, setPicked] = useState<number | null>(null)
   const [paused, setPaused] = useState(false)
+  // Once the student passes the checkpoint (chooses to answer more), don't
+  // interrupt again — Q6–10 flow like normal questions. A right-rail "Build my
+  // plan now" stays available so they can still stop anytime.
+  const [continued, setContinued] = useState(false)
 
   const answeredCount = Object.keys(answers).length
   const untilPlan = Math.max(0, FLOOR - answeredCount)
