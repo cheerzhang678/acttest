@@ -1,7 +1,7 @@
-import { Flame, CalendarClock, RotateCcw, ArrowRight, Check } from 'lucide-react'
+import { Flame, CalendarClock, RotateCcw, Check } from 'lucide-react'
 import { SKILL_LABEL, SKILL_DOMAIN } from '../types'
 import type { Onboarding, Profile } from '../lib/profile'
-import { AppShell, TwoCol, Card, Pill, PrimaryButton, IconChip, DOMAIN_CHIP } from '../components/ui'
+import { AppShell, TwoCol, Card, Pill, IconChip, DOMAIN_CHIP } from '../components/ui'
 
 // Days 1–6 recap (2.4). This is the *routine* end-of-session screen — smaller
 // than the day-7 milestone. Its job is the return trigger: close the loop today,
@@ -11,12 +11,14 @@ export default function DailyCompleteScreen({
   onb,
   profile,
   day,
-  onContinue
+  onContinue,
+  onDoneForToday
 }: {
   onb: Onboarding
   profile: Profile
   day: number
   onContinue: () => void
+  onDoneForToday: () => void
 }) {
   const daysToTest = onb.weeks * 7 - day
   const focusLabel = SKILL_LABEL[profile.focusSkill]
@@ -35,7 +37,7 @@ export default function DailyCompleteScreen({
     >
       <div className="animate-fade-up">
         <h1 className="text-[26px] font-display font-semibold text-ink leading-tight">Day {day} done</h1>
-        <p className="text-[14px] text-ink-muted mt-1">Today's loop closed. Here's tomorrow.</p>
+        <p className="text-[14px] text-ink-muted mt-1">Today's loop is closed — streak saved. Tomorrow's set is waiting.</p>
       </div>
 
       <div className="mt-6">
@@ -77,11 +79,25 @@ export default function DailyCompleteScreen({
                 <Check size={15} className="text-success" /> Tomorrow's {onb.dailyMin} min is already planned. Zero decisions.
               </div>
 
-              <div className="space-y-2 pt-1">
-                <PrimaryButton onClick={onContinue}>
-                  {day >= 6 ? 'Jump to day 7' : 'See tomorrow'} <ArrowRight size={16} className="inline ml-1 -mt-0.5" />
-                </PrimaryButton>
-                <p className="text-center text-[12px] text-ink-muted">Come back tomorrow to keep the streak alive.</p>
+              {/* Two paths, one visual language (matches the diagnostic checkpoint):
+                  accent-filled = the recommended move (spacing beats cramming),
+                  outline = the eager student who wants to push on now. */}
+              <div className="flex flex-col gap-2.5 pt-1">
+                <button
+                  onClick={onDoneForToday}
+                  className="w-full rounded-full bg-accent text-white font-semibold py-3.5 text-[15px] text-center transition active:scale-[0.98] hover:bg-accent/90"
+                >
+                  That's a wrap for today
+                </button>
+                <button
+                  onClick={onContinue}
+                  className="w-full rounded-full bg-transparent border border-accent text-accent font-semibold py-3.5 text-[15px] text-center transition active:scale-[0.98] hover:bg-accent-soft"
+                >
+                  {day >= 6 ? 'Keep going — jump to day 7 →' : "Keep going — do tomorrow's set now →"}
+                </button>
+                <p className="text-center text-[12px] text-ink-muted">
+                  Spacing beats cramming — but if you're in flow, keep rolling.
+                </p>
               </div>
             </div>
           }

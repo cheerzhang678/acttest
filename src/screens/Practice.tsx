@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Lightbulb, Check, ChevronDown, ChevronRight, ArrowRight, ArrowLeft, TrendingUp, HelpCircle, ShieldQuestion, Timer } from 'lucide-react'
+import { Lightbulb, Check, ChevronDown, ChevronRight, ArrowRight, ArrowLeft, TrendingUp, HelpCircle, ShieldQuestion, Timer, PauseCircle } from 'lucide-react'
 import type { DataTable, PracticeItem } from '../types'
 import { PRACTICE_ITEMS } from '../data/items'
 import type { Onboarding, Profile } from '../lib/profile'
 import { PACE_SEC } from '../lib/profile'
+import { loadSession, saveSession, clearSession } from '../lib/session'
+import type { PracticeRec } from '../lib/session'
 import { AppShell, TwoCol, Card, PrimaryButton, Pill, Meter } from '../components/ui'
 
 // Screen 4 — daily practice with layered AI feedback (key moment #2).
@@ -22,26 +24,24 @@ import { AppShell, TwoCol, Card, PrimaryButton, Pill, Meter } from '../component
 // layered feedback, nav) — feedback sits beside the question, not below it.
 type Phase = 'answering' | 'hint' | 'resolved'
 
-interface Rec {
-  phase: Phase
-  firstWrong: number | null
-  lastPick: number | null
-  correctOnFirst: boolean
-  timeSec: number // seconds to first commit — the pace signal
-}
+// Per-question committed state. Shared shape with the saved-session layer so an
+// interrupted day rehydrates verbatim.
+type Rec = PracticeRec
 
 export default function PracticeScreen({
   onb,
   profile,
   day,
   onDone,
-  onViewReport
+  onViewReport,
+  onExit
 }: {
   onb: Onboarding
   profile: Profile
   day?: number
   onDone: () => void
   onViewReport?: () => void
+  onExit?: () => void
 }) {
   // Lead with the skill today's plan targeted, for continuity from the Plan screen.
   // Science is an optional section — only include its data-passage items if the
@@ -55,10 +55,34 @@ export default function PracticeScreen({
     return [...focus, ...rest]
   }, [profile.focusSkill, onb.takingScience])
 
-  const [idx, setIdx] = useState(0)
-  const [records, setRecords] = useState<Record<number, Rec>>({})
-  const [streak, setStreak] = useState(0)
+  const curDay = day ?? 1
+
+  // Memory: if an interrupted session for THIS day is saved, resume from it —
+  // same question, same streak, same per-question state. Read once on mount.
+  const resume = useMemo(() => {
+    const s = loadSession()
+    return s && s.day === curDay ? s : null
+  }, [curDay])
+
+  const [idx, setIdx] = useState(resume?.idx ?? 0)
+  const [records, setRecords] = useState<Record<number, Rec>>(resume?.records ?? {})
+  const [streak, setStreak] = useState(resume?.streak ?? 0)
   const [showRule, setShowRule] = useState(false)
+
+  // Auto-save the whole session on every change, so closing the tab mid-set
+  // never loses progress. Cleared when the day is finished (see next()).
+  useEffect(() => {
+    saveSession({
+      onb,
+      profile,
+      day: curDay,
+      idx,
+      records,
+      streak,
+      total: items.length,
+      savedAt: Date.now()
+    })
+  }, [onb, profile, curDay, idx, records, streak, items.length])
 
   const item = items[idx]
   const rec = records[idx]
@@ -111,7 +135,10 @@ export default function PracticeScreen({
   }
 
   function next() {
-    if (idx + 1 >= items.length) return onDone()
+    if (idx + 1 >= items.length) {
+      clearSession() // day finished — nothing left to resume
+      return onDone()
+    }
     setIdx(idx + 1)
     setShowRule(false)
   }
@@ -131,6 +158,7 @@ export default function PracticeScreen({
   }
 
   const answeredSoFar = Object.keys(records).length
+  const resolvedSoFar = Object.values(records).filter((r) => r.phase === 'resolved').length
 
   return (
     <AppShell
@@ -316,6 +344,18 @@ export default function PracticeScreen({
                 )}
               </div>
             </div>
+
+            {/* memory: leave anytime — progress is saved, resume where you left off.
+                Out of time or interrupted? This is the graceful exit. */}
+            {onExit && idx + 1 < items.length && (
+              <button
+                onClick={onExit}
+                className="w-full inline-flex items-center justify-center gap-1.5 text-[13px] font-medium text-ink-muted hover:text-ink active:scale-[0.99] transition pt-1"
+              >
+                <PauseCircle size={15} /> Save &amp; finish later
+                <span className="text-ink-muted/70">· {items.length - resolvedSoFar} left</span>
+              </button>
+            )}
           </div>
         }
       />

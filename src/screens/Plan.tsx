@@ -1,8 +1,9 @@
-import { Target, CheckCircle2, Clock, ArrowRight, CalendarClock, RefreshCw, FlaskConical, PenLine } from 'lucide-react'
+import { Target, CheckCircle2, Clock, ArrowRight, CalendarClock, RefreshCw, RotateCcw, FlaskConical, PenLine } from 'lucide-react'
 import type { ReactNode } from 'react'
 import type { CoreDomain, Skill } from '../types'
 import { SKILL_LABEL, SKILL_DOMAIN } from '../types'
 import type { Onboarding, Profile } from '../lib/profile'
+import { loadSession, resolvedCount } from '../lib/session'
 import { AppShell, TwoCol, Card, Meter, Pill, PrimaryButton, IconChip, DOMAIN_CHIP } from '../components/ui'
 
 const DOMAINS: CoreDomain[] = ['English', 'Math', 'Reading']
@@ -14,15 +15,24 @@ const DOMAINS: CoreDomain[] = ['English', 'Math', 'Reading']
 export default function PlanScreen({
   onb,
   profile,
+  day = 1,
   onStartPractice
 }: {
   onb: Onboarding
   profile: Profile
+  day?: number
   onStartPractice: () => void
 }) {
   const gap = Math.max(0, onb.target - profile.estComposite)
   const weakest = [...DOMAINS].sort((a, b) => profile.byDomain[a].estScore - profile.byDomain[b].estScore)[0]
   const days = onb.weeks * 7
+
+  // Resume hook: if the student paused this day's set partway, surface it here
+  // (their home) so re-opening the app lands on "pick up where you left off".
+  const saved = loadSession()
+  const done = saved && saved.day === day ? resolvedCount(saved) : 0
+  const resumeLeft = saved && saved.day === day && done > 0 ? saved.total - done : 0
+  const resuming = resumeLeft > 0
 
   return (
     <AppShell
@@ -86,6 +96,18 @@ export default function PlanScreen({
           }
           right={
             <div className="space-y-6">
+              {/* resume card — the "memory" payoff: paused earlier today? one tap back in */}
+              {resuming && (
+                <div className="rounded-3xl bg-accent-soft p-5 animate-pop">
+                  <div className="flex items-center gap-2 text-accent font-bold text-[15px]">
+                    <RotateCcw size={17} /> Pick up where you left off
+                  </div>
+                  <p className="mt-2 text-[14px] text-ink leading-relaxed">
+                    You paused Day {day} with <span className="font-semibold">{resumeLeft}</span> of {saved!.total} questions left. We saved your spot — nothing lost.
+                  </p>
+                </div>
+              )}
+
               {/* ranked weak skills */}
               <div>
                 <h2 className="text-[15px] font-bold text-ink mb-3">Your 3 biggest levers</h2>
@@ -109,7 +131,7 @@ export default function PlanScreen({
               </div>
 
               <PrimaryButton onClick={onStartPractice}>
-                Start today · {SKILL_LABEL[profile.focusSkill]}
+                {resuming ? `Resume today · ${resumeLeft} left` : `Start today · ${SKILL_LABEL[profile.focusSkill]}`}
               </PrimaryButton>
 
               {/* optional sections the student opted into at onboarding */}

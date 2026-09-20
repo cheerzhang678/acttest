@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Onboarding, Profile } from './lib/profile'
+import { loadSession, clearSession } from './lib/session'
 import OnboardingScreen from './screens/Onboarding'
 import DiagnosticScreen from './screens/Diagnostic'
 import PlanScreen from './screens/Plan'
@@ -12,10 +13,15 @@ export type Step = 'onboarding' | 'diagnostic' | 'plan' | 'practice' | 'daily' |
 const DEFAULT_ONB: Onboarding = { target: 28, current: 22, weeks: 10, dailyMin: 40, takingScience: false, takingWriting: false }
 
 export default function App() {
-  const [step, setStep] = useState<Step>('onboarding')
-  const [onb, setOnb] = useState<Onboarding>(DEFAULT_ONB)
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [day, setDay] = useState(1)
+  // Memory: a saved unfinished session drops the student back on their plan
+  // (their "home"), where a resume card waits — instead of restarting onboarding.
+  const resumed = loadSession()
+  const canResume = !!(resumed && resumed.profile)
+
+  const [step, setStep] = useState<Step>(canResume ? 'plan' : 'onboarding')
+  const [onb, setOnb] = useState<Onboarding>(resumed?.onb ?? DEFAULT_ONB)
+  const [profile, setProfile] = useState<Profile | null>(resumed?.profile ?? null)
+  const [day, setDay] = useState(resumed?.day ?? 1)
 
   return (
     <>
@@ -40,7 +46,7 @@ export default function App() {
       )}
 
       {step === 'plan' && profile && (
-        <PlanScreen onb={onb} profile={profile} onStartPractice={() => setStep('practice')} />
+        <PlanScreen onb={onb} profile={profile} day={day} onStartPractice={() => setStep('practice')} />
       )}
 
       {step === 'practice' && profile && (
@@ -50,6 +56,7 @@ export default function App() {
           day={day}
           onDone={() => setStep(day >= 7 ? 'day7' : 'daily')}
           onViewReport={() => setStep('plan')}
+          onExit={() => setStep('plan')}
         />
       )}
 
@@ -58,6 +65,7 @@ export default function App() {
           onb={onb}
           profile={profile}
           day={day}
+          onDoneForToday={() => setStep('plan')}
           onContinue={() => {
             if (day >= 6) {
               setDay(7)
@@ -75,6 +83,7 @@ export default function App() {
           onb={onb}
           profile={profile}
           onRestart={() => {
+            clearSession()
             setProfile(null)
             setDay(1)
             setStep('onboarding')
