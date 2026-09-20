@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Zap, Check, Gauge } from 'lucide-react'
+import { Zap, Check, Gauge, TrendingUp } from 'lucide-react'
 import type { DiagItem, CoreDomain } from '../types'
 import type { Onboarding, Profile } from '../lib/profile'
 import { DIAG_ITEMS } from '../data/items'
@@ -57,6 +57,10 @@ export default function DiagnosticScreen({
   const answeredCount = Object.keys(answers).length
   const untilPlan = Math.max(0, FLOOR - answeredCount)
   const counts = domainCounts(new Set(Object.keys(answers)))
+  // Live report confidence + how much the last answered question moved it —
+  // shown in the right rail during the Q6–10 "sharper read" phase.
+  const confNow = reportConfidence(answeredCount)
+  const confDelta = confNow - reportConfidence(answeredCount - 1)
 
   function finish(a: Record<string, boolean>) {
     onDone(buildProfile(onb, a))
@@ -93,7 +97,6 @@ export default function DiagnosticScreen({
 
   // ---- Checkpoint (2.2): show the accuracy tradeoff, let the student decide ----
   if (paused) {
-    const confNow = reportConfidence(answeredCount)
     const confMax = reportConfidence(CAP)
     const more = CAP - answeredCount
     return (
@@ -200,9 +203,22 @@ export default function DiagnosticScreen({
           <Card>
             {continued ? (
               <>
-                {/* sharper-read phase: progress toward the full set, stop anytime */}
+                {/* sharper-read phase: each extra question nudges report confidence up */}
                 <div className="text-[13px] font-semibold text-ink-muted mb-2">Sharpening your report</div>
-                <Meter value={(Math.min(answeredCount, CAP) / CAP) * 100} tone="success" />
+                <div key={answeredCount} className="animate-pop flex items-end justify-between">
+                  <div>
+                    <div className="text-[12px] text-ink-muted">Report confidence</div>
+                    <div className="text-[30px] leading-none font-bold text-ink tabular-nums">~{confNow}%</div>
+                  </div>
+                  {confDelta > 0 && (
+                    <Pill tone="success">
+                      <TrendingUp size={13} /> +{confDelta}% this question
+                    </Pill>
+                  )}
+                </div>
+                <div className="mt-3">
+                  <Meter value={confNow} tone="success" />
+                </div>
                 <div className="mt-2 text-[12px] text-ink-muted">
                   Question {answeredCount + 1} of {CAP} · already enough for a plan
                 </div>
