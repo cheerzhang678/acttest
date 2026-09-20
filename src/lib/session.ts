@@ -1,4 +1,5 @@
 import type { Onboarding, Profile } from './profile'
+import type { Domain } from '../types'
 
 // Practice "memory" layer — persists an in-progress daily session so a student
 // who runs out of time or gets interrupted can close the tab and pick up exactly
@@ -19,6 +20,7 @@ export interface SavedSession {
   onb: Onboarding
   profile: Profile
   day: number
+  focusDomain: Domain // which category this day's set covers (student-chosen)
   idx: number
   records: Record<number, PracticeRec>
   streak: number

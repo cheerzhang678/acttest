@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import type { Onboarding, Profile } from './lib/profile'
+import { weakestDomain } from './lib/profile'
 import { loadSession, clearSession } from './lib/session'
+import type { Domain } from './types'
 import OnboardingScreen from './screens/Onboarding'
 import DiagnosticScreen from './screens/Diagnostic'
 import PlanScreen from './screens/Plan'
@@ -22,6 +24,12 @@ export default function App() {
   const [onb, setOnb] = useState<Onboarding>(resumed?.onb ?? DEFAULT_ONB)
   const [profile, setProfile] = useState<Profile | null>(resumed?.profile ?? null)
   const [day, setDay] = useState(resumed?.day ?? 1)
+  // Which category today's practice covers. null = follow the recommendation
+  // (weakest domain); the student can override it each day on the Plan screen.
+  const [focusDomain, setFocusDomain] = useState<Domain | null>(resumed?.focusDomain ?? null)
+
+  const recommended: Domain = profile ? weakestDomain(profile) : 'English'
+  const resolvedFocus: Domain = focusDomain ?? recommended
 
   return (
     <>
@@ -46,7 +54,15 @@ export default function App() {
       )}
 
       {step === 'plan' && profile && (
-        <PlanScreen onb={onb} profile={profile} day={day} onStartPractice={() => setStep('practice')} />
+        <PlanScreen
+          onb={onb}
+          profile={profile}
+          day={day}
+          focusDomain={resolvedFocus}
+          recommended={recommended}
+          onPickFocus={setFocusDomain}
+          onStartPractice={() => setStep('practice')}
+        />
       )}
 
       {step === 'practice' && profile && (
@@ -54,6 +70,7 @@ export default function App() {
           onb={onb}
           profile={profile}
           day={day}
+          focusDomain={resolvedFocus}
           onDone={() => setStep(day >= 7 ? 'day7' : 'daily')}
           onViewReport={() => setStep('plan')}
           onExit={() => setStep('plan')}
@@ -63,10 +80,14 @@ export default function App() {
       {step === 'daily' && profile && (
         <DailyCompleteScreen
           onb={onb}
-          profile={profile}
           day={day}
-          onDoneForToday={() => setStep('plan')}
+          focusDomain={resolvedFocus}
+          onDoneForToday={() => {
+            setFocusDomain(null)
+            setStep('plan')
+          }}
           onContinue={() => {
+            setFocusDomain(null)
             if (day >= 6) {
               setDay(7)
               setStep('day7')
@@ -86,6 +107,7 @@ export default function App() {
             clearSession()
             setProfile(null)
             setDay(1)
+            setFocusDomain(null)
             setStep('onboarding')
           }}
           onPractice={() => setStep('practice')}

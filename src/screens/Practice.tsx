@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Lightbulb, Check, ChevronDown, ChevronRight, ArrowRight, ArrowLeft, TrendingUp, HelpCircle, ShieldQuestion, Timer, PauseCircle } from 'lucide-react'
-import type { DataTable, PracticeItem } from '../types'
+import type { DataTable, Domain, PracticeItem } from '../types'
 import { PRACTICE_ITEMS } from '../data/items'
 import type { Onboarding, Profile } from '../lib/profile'
 import { PACE_SEC } from '../lib/profile'
@@ -32,6 +32,7 @@ export default function PracticeScreen({
   onb,
   profile,
   day,
+  focusDomain,
   onDone,
   onViewReport,
   onExit
@@ -39,30 +40,29 @@ export default function PracticeScreen({
   onb: Onboarding
   profile: Profile
   day?: number
+  focusDomain: Domain
   onDone: () => void
   onViewReport?: () => void
   onExit?: () => void
 }) {
-  // Lead with the skill today's plan targeted, for continuity from the Plan screen.
-  // Science is an optional section — only include its data-passage items if the
-  // student opted into Science at onboarding (otherwise it's off their plan).
+  // Today's set covers the category the student chose on the Plan screen
+  // (defaults to their weakest domain, but they can pick another any day).
+  // Ordered easiest-first so the session builds confidence before it bites.
   const items = useMemo<PracticeItem[]>(() => {
-    const pool = onb.takingScience
-      ? PRACTICE_ITEMS
-      : PRACTICE_ITEMS.filter((p) => p.domain !== 'Science')
-    const focus = pool.filter((p) => p.skill === profile.focusSkill)
-    const rest = pool.filter((p) => p.skill !== profile.focusSkill)
-    return [...focus, ...rest]
-  }, [profile.focusSkill, onb.takingScience])
+    const inDomain = PRACTICE_ITEMS.filter((p) => p.domain === focusDomain)
+    // Fallback: if a domain has no bank yet, don't strand the student.
+    const pool = inDomain.length > 0 ? inDomain : PRACTICE_ITEMS.filter((p) => p.domain !== 'Science')
+    return [...pool].sort((a, b) => a.difficulty - b.difficulty)
+  }, [focusDomain])
 
   const curDay = day ?? 1
 
-  // Memory: if an interrupted session for THIS day is saved, resume from it —
-  // same question, same streak, same per-question state. Read once on mount.
+  // Memory: resume only when the saved session matches BOTH the day and the
+  // chosen category — switching category starts that day's set fresh.
   const resume = useMemo(() => {
     const s = loadSession()
-    return s && s.day === curDay ? s : null
-  }, [curDay])
+    return s && s.day === curDay && s.focusDomain === focusDomain ? s : null
+  }, [curDay, focusDomain])
 
   const [idx, setIdx] = useState(resume?.idx ?? 0)
   const [records, setRecords] = useState<Record<number, Rec>>(resume?.records ?? {})
@@ -76,13 +76,14 @@ export default function PracticeScreen({
       onb,
       profile,
       day: curDay,
+      focusDomain,
       idx,
       records,
       streak,
       total: items.length,
       savedAt: Date.now()
     })
-  }, [onb, profile, curDay, idx, records, streak, items.length])
+  }, [onb, profile, curDay, focusDomain, idx, records, streak, items.length])
 
   const item = items[idx]
   const rec = records[idx]

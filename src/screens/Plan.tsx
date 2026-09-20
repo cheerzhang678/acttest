@@ -1,6 +1,6 @@
 import { Target, CheckCircle2, Clock, ArrowRight, CalendarClock, RefreshCw, RotateCcw, FlaskConical, PenLine } from 'lucide-react'
 import type { ReactNode } from 'react'
-import type { CoreDomain, Skill } from '../types'
+import type { CoreDomain, Domain, Skill } from '../types'
 import { SKILL_LABEL, SKILL_DOMAIN } from '../types'
 import type { Onboarding, Profile } from '../lib/profile'
 import { loadSession, resolvedCount } from '../lib/session'
@@ -16,23 +16,38 @@ export default function PlanScreen({
   onb,
   profile,
   day = 1,
+  focusDomain,
+  recommended,
+  onPickFocus,
   onStartPractice
 }: {
   onb: Onboarding
   profile: Profile
   day?: number
+  focusDomain: Domain
+  recommended: Domain
+  onPickFocus: (d: Domain) => void
   onStartPractice: () => void
 }) {
   const gap = Math.max(0, onb.target - profile.estComposite)
   const weakest = [...DOMAINS].sort((a, b) => profile.byDomain[a].estScore - profile.byDomain[b].estScore)[0]
   const days = onb.weeks * 7
 
-  // Resume hook: if the student paused this day's set partway, surface it here
-  // (their home) so re-opening the app lands on "pick up where you left off".
+  // The categories the student can pick from today — core three, plus Science
+  // if they opted into it. They're free to work any of these on any day.
+  const focusChoices: Domain[] = onb.takingScience ? ['English', 'Math', 'Reading', 'Science'] : DOMAINS
+
+  // Resume hook: only when the paused set matches BOTH the day and the picked
+  // category (switching category starts fresh, so the resume card hides).
   const saved = loadSession()
-  const done = saved && saved.day === day ? resolvedCount(saved) : 0
-  const resumeLeft = saved && saved.day === day && done > 0 ? saved.total - done : 0
+  const done = saved && saved.day === day && saved.focusDomain === focusDomain ? resolvedCount(saved) : 0
+  const resumeLeft = done > 0 ? saved!.total - done : 0
   const resuming = resumeLeft > 0
+
+  // If today's pick is the recommended focus, name the exact skill; otherwise
+  // just name the category the student chose to work on.
+  const leadFocusLabel =
+    SKILL_DOMAIN[profile.focusSkill] === focusDomain ? SKILL_LABEL[profile.focusSkill] : focusDomain
 
   return (
     <AppShell
@@ -96,6 +111,40 @@ export default function PlanScreen({
           }
           right={
             <div className="space-y-6">
+              {/* category picker — the student steers each day's focus; the plan
+                  recommends their weakest area but never locks them into it */}
+              <Card>
+                <div className="flex items-center justify-between mb-1">
+                  <h2 className="text-[15px] font-bold text-ink">Work on today</h2>
+                  <span className="text-[12px] text-ink-muted">You pick · plan adapts</span>
+                </div>
+                <p className="text-[12px] text-ink-muted leading-relaxed mb-3">
+                  Recommended: <span className="font-semibold text-ink">{recommended}</span> — your biggest gap. But any day is yours to steer.
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {focusChoices.map((d) => {
+                    const { icon: Icon } = DOMAIN_CHIP[d]
+                    const active = d === focusDomain
+                    return (
+                      <button
+                        key={d}
+                        onClick={() => onPickFocus(d)}
+                        aria-pressed={active}
+                        className={`flex items-center gap-2 rounded-2xl border px-3 py-2.5 text-left transition active:scale-[0.98] ${
+                          active ? 'border-accent bg-accent-soft' : 'border-border bg-surface hover:border-accent/40'
+                        }`}
+                      >
+                        <Icon size={17} className={active ? 'text-accent' : 'text-ink-muted'} />
+                        <span className={`text-[14px] font-semibold ${active ? 'text-accent' : 'text-ink'}`}>{d}</span>
+                        {d === recommended && (
+                          <span className="ml-auto text-[10px] font-bold uppercase tracking-wide text-accent">rec</span>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              </Card>
+
               {/* resume card — the "memory" payoff: paused earlier today? one tap back in */}
               {resuming && (
                 <div className="rounded-3xl bg-accent-soft p-5 animate-pop">
@@ -103,7 +152,7 @@ export default function PlanScreen({
                     <RotateCcw size={17} /> Pick up where you left off
                   </div>
                   <p className="mt-2 text-[14px] text-ink leading-relaxed">
-                    You paused Day {day} with <span className="font-semibold">{resumeLeft}</span> of {saved!.total} questions left. We saved your spot — nothing lost.
+                    You paused Day {day} {focusDomain} with <span className="font-semibold">{resumeLeft}</span> of {saved!.total} questions left. We saved your spot — nothing lost.
                   </p>
                 </div>
               )}
@@ -121,17 +170,17 @@ export default function PlanScreen({
               {/* today's minutes */}
               <div className="rounded-3xl bg-accent-soft p-5">
                 <div className="flex items-center gap-2 text-accent font-bold text-[15px]">
-                  <Clock size={17} /> Today · {onb.dailyMin} min
+                  <Clock size={17} /> Today · {onb.dailyMin} min · {focusDomain}
                 </div>
                 <ul className="mt-3 space-y-2.5">
-                  <TodoLine minutes={Math.round(onb.dailyMin * 0.6)} text={`${SKILL_LABEL[profile.focusSkill]} — drills + AI coaching`} lead />
+                  <TodoLine minutes={Math.round(onb.dailyMin * 0.6)} text={`${leadFocusLabel} — drills + AI coaching`} lead />
                   <TodoLine minutes={Math.round(onb.dailyMin * 0.25)} text="Mixed review of yesterday's misses" />
                   <TodoLine minutes={onb.dailyMin - Math.round(onb.dailyMin * 0.6) - Math.round(onb.dailyMin * 0.25)} text="Timed mini-set to check your pace" />
                 </ul>
               </div>
 
               <PrimaryButton onClick={onStartPractice}>
-                {resuming ? `Resume today · ${resumeLeft} left` : `Start today · ${SKILL_LABEL[profile.focusSkill]}`}
+                {resuming ? `Resume today · ${resumeLeft} left` : `Start today · ${leadFocusLabel}`}
               </PrimaryButton>
 
               {/* optional sections the student opted into at onboarding */}

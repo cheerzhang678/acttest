@@ -75,7 +75,9 @@ export interface DiagItem {
 // grammar = objective, one defensible answer → AI can speak with confidence.
 // rhetoric = Production of Writing, judgment-based → AI must stay restrained.
 // science = objective data interpretation → AI speaks with confidence (like grammar).
-export type ItemKind = 'grammar' | 'rhetoric' | 'science'
+// math = objective computation → confident. reading = evidence-grounded, one
+// defensible answer the AI backs with a line from the passage → confident.
+export type ItemKind = 'grammar' | 'rhetoric' | 'science' | 'math' | 'reading'
 
 // A small data table for Science items — the "figure" a data passage asks about.
 export interface DataTable {

@@ -1,6 +1,7 @@
 import { Flame, CalendarClock, RotateCcw, Check } from 'lucide-react'
-import { SKILL_LABEL, SKILL_DOMAIN } from '../types'
-import type { Onboarding, Profile } from '../lib/profile'
+import type { Domain } from '../types'
+import type { Onboarding } from '../lib/profile'
+import { PRACTICE_ITEMS } from '../data/items'
 import { AppShell, TwoCol, Card, Pill, IconChip, DOMAIN_CHIP } from '../components/ui'
 
 // Days 1–6 recap (2.4). This is the *routine* end-of-session screen — smaller
@@ -9,22 +10,22 @@ import { AppShell, TwoCol, Card, Pill, IconChip, DOMAIN_CHIP } from '../componen
 // of today's misses). Streak + exam countdown keep the stakes visible.
 export default function DailyCompleteScreen({
   onb,
-  profile,
   day,
+  focusDomain,
   onContinue,
   onDoneForToday
 }: {
   onb: Onboarding
-  profile: Profile
   day: number
+  focusDomain: Domain
   onContinue: () => void
   onDoneForToday: () => void
 }) {
   const daysToTest = onb.weeks * 7 - day
-  const focusLabel = SKILL_LABEL[profile.focusSkill]
   // Demo values — in the real app these come from the session just finished.
-  const correct = 4
-  const total = 5
+  // Sized to the category the student actually practiced today.
+  const total = PRACTICE_ITEMS.filter((p) => p.domain === focusDomain).length || 5
+  const correct = Math.max(1, total - 1)
   const dueTomorrow = total - correct + 1 // today's misses re-queued + 1 spaced card
 
   return (
@@ -45,13 +46,13 @@ export default function DailyCompleteScreen({
           left={
             <div className="rounded-3xl bg-success-soft p-6 text-center">
               <div className="flex justify-center mb-3">
-                <IconChip {...DOMAIN_CHIP[SKILL_DOMAIN[profile.focusSkill]]} size={44} />
+                <IconChip {...DOMAIN_CHIP[focusDomain]} size={44} />
               </div>
-              <div className="text-[13px] font-semibold text-success">Today's set</div>
+              <div className="text-[13px] font-semibold text-success">Today's set · {focusDomain}</div>
               <div className="mt-1 text-[48px] leading-none font-bold text-ink tabular-nums">
                 {correct}<span className="text-[24px] text-ink-muted">/{total}</span>
               </div>
-              <p className="mt-3 text-[14px] text-ink">Nice — {focusLabel} is getting sharper.</p>
+              <p className="mt-3 text-[14px] text-ink">Nice — your {focusDomain} is getting sharper.</p>
             </div>
           }
           right={

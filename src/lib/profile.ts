@@ -122,3 +122,10 @@ export function buildProfile(onb: Onboarding, answers: Record<string, boolean>):
 function clampScore(n: number): number {
   return Math.max(1, Math.min(36, n))
 }
+
+// The core domain with the lowest estimated sub-score — the default "work on
+// this today" recommendation. The student can override it (practice any domain
+// they want that day), but this is where the plan points them first.
+export function weakestDomain(p: Profile): CoreDomain {
+  return [...DOMAINS].sort((a, b) => p.byDomain[a].estScore - p.byDomain[b].estScore)[0]
+}

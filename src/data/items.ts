@@ -341,6 +341,108 @@ export const PRACTICE_ITEMS: PracticeItem[] = [
       'The table jumps from 32 g at 20 °C to 46 g at 30 °C. 25 °C sits halfway between those rows, so the value is about halfway between them — roughly 39 g. B (32) just copies the 20 °C row, but solubility keeps climbing as temperature rises.',
     takeaway: "When a value lands between two rows, estimate between them — don't just grab the nearest row.",
     confirm: 'Right — 25 °C is between 20° and 30°, so solubility is about 39 g.'
+  },
+  // --- Math practice items. Objective computation → the AI coaches with
+  //     confidence (kind: 'math' behaves like grammar; no rhetoric restraint). ---
+  {
+    id: 'p-ma-1',
+    kind: 'math',
+    domain: 'Math',
+    skill: 'algebra',
+    difficulty: 1,
+    passage: '',
+    underline: '',
+    prompt: 'If 3x − 7 = 14, what is the value of x?',
+    choices: [
+      { label: 'A', text: '3' },
+      { label: 'B', text: '7' },
+      { label: 'C', text: '21' },
+      { label: 'D', text: '9' }
+    ],
+    correct: 1,
+    distractorTrap: 3,
+    hint: "What's the first move to get x by itself — deal with the −7 or the ×3 first?",
+    ruleTitle: 'Undo operations in reverse',
+    explanation:
+      'Add 7 to both sides first: 3x = 21. Then divide by 3: x = 7. D (9) comes from dividing 14 by 3 and rounding — but you have to undo the −7 before the ×3.',
+    takeaway: 'Isolate the variable by undoing operations in reverse order: addition/subtraction first, then multiplication/division.',
+    confirm: 'Yep — add 7, then divide by 3: x = 7.'
+  },
+  {
+    id: 'p-ma-2',
+    kind: 'math',
+    domain: 'Math',
+    skill: 'proportions',
+    difficulty: 2,
+    passage: '',
+    underline: '',
+    prompt: 'A jacket priced at $40 is on sale for 25% off. What is the sale price?',
+    choices: [
+      { label: 'A', text: '$10' },
+      { label: 'B', text: '$15' },
+      { label: 'C', text: '$30' },
+      { label: 'D', text: '$35' }
+    ],
+    correct: 2,
+    distractorTrap: 0,
+    hint: '25% off means you pay what fraction of the original? Find that, not just the discount.',
+    ruleTitle: 'Percent off = pay the rest',
+    explanation:
+      "25% of $40 is $10 — but that's the discount, not the price. A (10) stops there. You pay the other 75%: $40 − $10 = $30, or 0.75 × 40 = $30.",
+    takeaway: 'For "% off," either subtract the discount or multiply by (100 − %). The answer is what you pay, not what you save.',
+    confirm: 'Right — 25% off $40 is a $10 discount, so you pay $30.'
+  },
+  // --- Reading practice items. One defensible answer grounded in the passage →
+  //     the AI coaches with confidence, citing the line (kind: 'reading'). ---
+  {
+    id: 'p-re-1',
+    kind: 'reading',
+    domain: 'Reading',
+    skill: 'inference',
+    difficulty: 2,
+    passage:
+      'Maya had rehearsed her speech a dozen times, yet as she stepped onto the stage her prepared words scattered like startled birds. She gripped the podium, took a breath, and began — not with her script, but with the truth.',
+    underline: '',
+    prompt: "The phrase 'scattered like startled birds' most nearly suggests that Maya:",
+    choices: [
+      { label: 'A', text: 'forgot her speech was that day' },
+      { label: 'B', text: 'suddenly lost her memorized words' },
+      { label: 'C', text: 'was frightened by the audience' },
+      { label: 'D', text: 'spoke more quickly than planned' }
+    ],
+    correct: 1,
+    distractorTrap: 2,
+    hint: "The birds are her 'prepared words.' What happens to words that scatter the moment she's on stage?",
+    ruleTitle: 'Read the image, then map it back',
+    explanation:
+      'The metaphor describes her "prepared words" — so it\'s about the words, not her feelings. Words that "scatter like startled birds" vanish suddenly: she lost her memorized lines (B). C is tempting because the stage is scary, but the image is about the words, not fear.',
+    takeaway: "For figurative-language questions, pin down what the image refers to, then translate the image literally — don't jump to the mood.",
+    confirm: 'Exactly — the image is about her words vanishing, so B.'
+  },
+  {
+    id: 'p-re-2',
+    kind: 'reading',
+    domain: 'Reading',
+    skill: 'main-idea',
+    difficulty: 3,
+    passage:
+      'For decades the reef had been mapped only from boats. Then divers began cataloging it inch by inch, and the maps they drew revealed channels and nurseries no surface survey had ever caught. The reef had not changed; our way of seeing it had.',
+    underline: '',
+    prompt: 'The passage is primarily concerned with:',
+    choices: [
+      { label: 'A', text: 'the dangers divers face while mapping reefs' },
+      { label: 'B', text: 'how closer observation can transform understanding' },
+      { label: 'C', text: 'why boats are poor tools for research' },
+      { label: 'D', text: 'the decline of coral reefs over decades' }
+    ],
+    correct: 1,
+    distractorTrap: 2,
+    hint: 'The last line is the giveaway: "The reef had not changed; our way of seeing it had." What\'s that about?',
+    ruleTitle: 'Main idea = the whole arc, not one detail',
+    explanation:
+      'The closing line states the point outright: what changed was how we see, not the reef. That\'s B. C (boats are poor tools) is just one detail on the way there; the passage isn\'t about boats, it\'s about observation changing understanding.',
+    takeaway: 'Main-idea answers cover the whole passage. If a choice only fits one sentence, it\'s a detail, not the main idea.',
+    confirm: "Right — the last line says it: our way of seeing changed, not the reef."
   }
 ]
 
