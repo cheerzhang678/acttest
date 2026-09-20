@@ -147,7 +147,12 @@ export default function DiagnosticScreen({
       {/* progress + hook */}
       <div className="shrink-0">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[13px] font-semibold text-ink-muted">{current.domain} · question {answeredCount + 1}</span>
+          <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-ink-muted">
+            Question {answeredCount + 1}
+            <span className="rounded-full bg-accent-soft text-accent px-2 py-0.5 text-[11px] font-semibold">
+              {current.domain}
+            </span>
+          </span>
           <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-accent">
             <Zap size={14} />
             {untilPlan > 0 ? `${untilPlan} more to unlock your plan` : 'Plan ready'}
