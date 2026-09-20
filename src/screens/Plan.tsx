@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import type { CoreDomain, Domain, Skill } from '../types'
 import { SKILL_LABEL, SKILL_DOMAIN } from '../types'
 import type { Onboarding, Profile } from '../lib/profile'
+import { leversFor } from '../lib/profile'
 import { loadSession, resolvedCount } from '../lib/session'
 import { AppShell, TwoCol, Card, Meter, Pill, PrimaryButton, IconChip, DOMAIN_CHIP } from '../components/ui'
 
@@ -44,10 +45,11 @@ export default function PlanScreen({
   const resumeLeft = done > 0 ? saved!.total - done : 0
   const resuming = resumeLeft > 0
 
-  // If today's pick is the recommended focus, name the exact skill; otherwise
-  // just name the category the student chose to work on.
-  const leadFocusLabel =
-    SKILL_DOMAIN[profile.focusSkill] === focusDomain ? SKILL_LABEL[profile.focusSkill] : focusDomain
+  // Today's levers follow the category the student picked — Math levers for
+  // Math, Reading for Reading — not a fixed English list. The lead drill in the
+  // "Today" block is that category's top lever.
+  const levers = leversFor(profile, focusDomain)
+  const leadFocusLabel = levers[0] ? SKILL_LABEL[levers[0]] : focusDomain
 
   return (
     <AppShell
@@ -157,11 +159,13 @@ export default function PlanScreen({
                 </div>
               )}
 
-              {/* ranked weak skills */}
+              {/* ranked weak skills — scoped to today's chosen category */}
               <div>
-                <h2 className="text-[15px] font-bold text-ink mb-3">Your 3 biggest levers</h2>
+                <h2 className="text-[15px] font-bold text-ink mb-3">
+                  Your biggest {focusDomain} levers
+                </h2>
                 <div className="space-y-2">
-                  {profile.weakSkills.map((sk, i) => (
+                  {levers.map((sk, i) => (
                     <WeakRow key={sk} skill={sk} estGain={gainFor(i, gap)} />
                   ))}
                 </div>

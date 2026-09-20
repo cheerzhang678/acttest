@@ -33,7 +33,8 @@ export interface DomainStat {
 export interface Profile {
   answered: number
   byDomain: Record<CoreDomain, DomainStat>
-  weakSkills: Skill[] // ranked, weakest first
+  weakSkills: Skill[] // ranked, weakest first (whole-exam, top 3)
+  weakSkillsByDomain: Record<CoreDomain, Skill[]> // per-domain levers, so the plan follows the category the student picks
   strongSkills: Skill[] // answered correctly — used for mastery-aware feedback
   focusSkill: Skill // the single skill today's session centers on
   estComposite: number
@@ -44,6 +45,16 @@ const DOMAINS: CoreDomain[] = ['English', 'Math', 'Reading']
 
 // Keep the plan focused on English when the diagnostic is inconclusive.
 const FALLBACK_WEAK: Skill[] = ['rhetoric-add-delete', 'punctuation', 'subject-verb']
+
+// Every skill grouped by domain, in a sensible default order. Used to top up a
+// domain's "biggest levers" when the diagnostic didn't surface 3 misses there —
+// so picking Math shows Math levers, not an English fallback.
+const DOMAIN_SKILLS: Record<Domain, Skill[]> = {
+  English: ['rhetoric-add-delete', 'punctuation', 'subject-verb', 'transitions', 'conciseness', 'rhetoric-transition'],
+  Math: ['algebra', 'proportions', 'statistics'],
+  Reading: ['main-idea', 'inference'],
+  Science: ['data-representation']
+}
 
 // Warm-start prior: the student's self-reported current score seeds the adaptive
 // engine's starting difficulty, so we need fewer questions to converge.
@@ -100,6 +111,22 @@ export function buildProfile(onb: Onboarding, answers: Record<string, boolean>):
     if (!weakSkills.includes(f)) weakSkills.push(f)
   }
 
+  // Per-domain levers: rank each domain's own missed skills, then top up from
+  // that domain's skill list. This is what lets the plan re-point when the
+  // student switches today's category (Math levers for Math, etc.).
+  const weakSkillsByDomain = {} as Record<CoreDomain, Skill[]>
+  for (const d of DOMAINS) {
+    const ranked = [...freq.entries()]
+      .filter(([sk]) => SKILL_DOMAIN[sk] === d)
+      .sort((a, b) => b[1] - a[1])
+      .map(([sk]) => sk)
+    for (const f of DOMAIN_SKILLS[d]) {
+      if (ranked.length >= 3) break
+      if (!ranked.includes(f)) ranked.push(f)
+    }
+    weakSkillsByDomain[d] = ranked.slice(0, 3)
+  }
+
   const focusSkill =
     weakSkills.find((sk) => SKILL_DOMAIN[sk] === 'English') ?? weakSkills[0] ?? 'subject-verb'
 
@@ -112,6 +139,7 @@ export function buildProfile(onb: Onboarding, answers: Record<string, boolean>):
     answered,
     byDomain,
     weakSkills: weakSkills.slice(0, 3),
+    weakSkillsByDomain,
     strongSkills: [...new Set(strongSkills)],
     focusSkill,
     estComposite,
@@ -128,4 +156,12 @@ function clampScore(n: number): number {
 // they want that day), but this is where the plan points them first.
 export function weakestDomain(p: Profile): CoreDomain {
   return [...DOMAINS].sort((a, b) => p.byDomain[a].estScore - p.byDomain[b].estScore)[0]
+}
+
+// The biggest score levers for the category the student chose to work today.
+// Core domains come from the diagnostic-ranked profile; Science (optional, not
+// diagnosed) falls back to its single skill so the section still reads right.
+export function leversFor(p: Profile, domain: Domain): Skill[] {
+  if (domain === 'Science') return DOMAIN_SKILLS.Science
+  return p.weakSkillsByDomain[domain]
 }
