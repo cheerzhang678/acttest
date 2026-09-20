@@ -294,15 +294,17 @@ export default function PracticeScreen({
               </div>
             )}
 
-            {/* nav */}
+            {/* nav — Back appears from Q2 on (to revisit the previous question);
+                on Q1 the top "Your plan & report" link is the only way back */}
             <div className="flex items-center gap-3 pt-1">
-              <button
-                onClick={back}
-                disabled={idx === 0}
-                className="inline-flex items-center gap-1 text-[13px] font-semibold text-ink-muted disabled:opacity-30 active:scale-95 transition"
-              >
-                <ArrowLeft size={15} /> Back
-              </button>
+              {idx > 0 && (
+                <button
+                  onClick={back}
+                  className="inline-flex items-center gap-1 text-[13px] font-semibold text-ink-muted hover:text-ink active:scale-95 transition"
+                >
+                  <ArrowLeft size={15} /> Back
+                </button>
+              )}
               <div className="flex-1">
                 {phase === 'resolved' && (
                   <div className="animate-fade-up">
